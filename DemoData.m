@@ -44,6 +44,8 @@ elseif strcmpi(sName,'DemoSeq')
     Trials = DemoSeqData;
 elseif strcmpi(sName,'DemoRMI')
     Trials = DemoRMIData;
+elseif strcmpi(sName,'DemoTSD_YN')
+    Trials = DemoTSD_YNData;
 else
     abort(['Unrecognized demo data set name: ' sName]);
 end
@@ -254,3 +256,28 @@ Trials.Cor = ones(NTrials,1);
 end
 
 
+function Trials = DemoTSD_YNData
+
+% Stim = 2 refers to signal trials, stim = 1 refers to noise trials.
+% Resp = 2 refers to "yes/signal" response, Resp = 1 refers to "no/noise" response.
+
+% Use a lot of short blocks for convenience: Computations for each block separately
+% are likely to lead to some Probabilities of 0 and 1, requiring adjustment,
+% whereas computations pooling blocks are not.
+
+NSubs = 15;
+FNames  = {'SubNo', 'Blk', 'Cond', 'Stim', 'Replic'};
+FLevels = [ NSubs     40       2       2     10    ];
+Trials = TrialFrame(FNames,FLevels,'Shuffle','Drop','Replic','SortBy',{'SubNo','Blk'});
+NTrials = height(Trials);
+
+dPrime = 0.5;
+Criterion = linspace(-1.5,1.5,NSubs) + dPrime/2;  % Unbiased criterion for middle SubNo gives Beta=1
+
+Trials.Resp = ones(NTrials,1);   % Initialize all to "no/noise" responses.
+
+Evoked = randn(NTrials,1) + (Trials.Stim - 1.5) * dPrime .* Trials.Cond;
+
+Trials.Resp(Evoked>Criterion(Trials.SubNo)') = 2;  % Set to "yes/signal" response if the evoked signal strength was larger than criterion.
+
+end

@@ -18,6 +18,16 @@ function [outIndices, outCondLabels] = SubTableIndices(Trials,CondSpecs,varargin
 
 [ExcludeIndicators, outArg] = ExtractNameVali('Exclude',zeros(height(Trials),1),outArg);
 
+if numel(CondSpecs)==0
+    % Inclulde all selected trials in a single condition.
+    NConds = 1;
+    outIndices = cell(NConds,1);
+    outIndices{1} = find(IncludeIndicators&~ExcludeIndicators);
+    tempoutCondLabels.All = ones(NConds,1);
+    outCondLabels = struct2table(tempoutCondLabels);
+    return
+end
+
 [CondSpecs, NCondSpecs] = EnsureCell(CondSpecs);
 
 [NConds, NSpecs, ~, ~, CondCombos, ~ ] = CondList(Trials(IncludeIndicators&~ExcludeIndicators,:),CondSpecs);

@@ -22,6 +22,7 @@ PrctilesTable = CondPrctiles(Trials,'RT',{'SubNo','Red'},Prctiles,'Include',Tria
 Vincentized = CondMeans(PrctilesTable,'RTprctiles','Red');
 
 % Plot the Vincentized CDF functions of the different Red conditions.
+figure;
 plot(Vincentized.RTprctiles(Vincentized.Red==1,:),Prctiles)
 hold on
 plot(Vincentized.RTprctiles(Vincentized.Red==2,:),Prctiles)
