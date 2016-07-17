@@ -46,6 +46,8 @@ elseif strcmpi(sName,'DemoRMI')
     Trials = DemoRMIData;
 elseif strcmpi(sName,'DemoTSD_YN')
     Trials = DemoTSD_YNData;
+elseif strcmpi(sName,'DemoSRCrosstab')
+    Trials = DemoSRCrosstab;
 else
     abort(['Unrecognized demo data set name: ' sName]);
 end
@@ -279,5 +281,13 @@ Trials.Resp = ones(NTrials,1);   % Initialize all to "no/noise" responses.
 Evoked = randn(NTrials,1) + (Trials.Stim - 1.5) * dPrime .* Trials.Cond;
 
 Trials.Resp(Evoked>Criterion(Trials.SubNo)') = 2;  % Set to "yes/signal" response if the evoked signal strength was larger than criterion.
+
+end
+
+
+function Trials = DemoSRCrosstab
+
+Trials = DemoData('Demo0');
+Trials.Resp=randi(3,height(Trials),1);
 
 end

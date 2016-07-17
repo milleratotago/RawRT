@@ -16,9 +16,6 @@ function sysResult = CallMrf(Trials,sDV,BetweenFacs,WithinFacs,SubjectSpec,sOutF
 
 % NewJeff: Need option to specify MrFpath.
 
-% NewJeff: Check to make sure subject numbers are all unique even if there are between-Ss factors.
-%  Without such a check, there will be problems if the user numbers Ss from 1 in every group.
-
 % Make sure these are cell arrays.
 [sDV, NDVs] = EnsureCell(sDV);
 [BetweenFacs, NBetweenFacs] = EnsureCell(BetweenFacs);
@@ -85,8 +82,8 @@ NEachGroup = NSubsPerGroup(1);  % HERE ONLY VALID FOR EQUAL N
 temp = abs(NSubsPerGroup - NEachGroup);
 assert(sum(temp)==0,'Sorry!  CallMrf does not work with unequal group sizes.');
 
-% Check whether all groups have distinct subject numbers.  This catches the case where users have e.g.
-% a subject number 1 in each group.
+% Check to make sure that all subject numbers are unique even if there are between-Ss factors.
+% Without such a check, there can be problems (e.g., if the user numbers Ss from 1-N in every group).
 if NGroups>1
     for iGroup=1:NGroups-1
         for jGroup=iGroup+1:NGroups

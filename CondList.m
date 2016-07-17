@@ -3,8 +3,7 @@ function [NConds, NDistinguished, Sizes, Values, CondCombos, Indices] = CondList
 %   to-be-distinguished labels.
 % Inputs:
 %   Trials: a "table" data set
-%   ToDistinguish: the names of the variables in the data set whose unique values are
-%     to be distinguished (but values less than or equal to TooSmallCode are ignored).
+%   ToDistinguish: the names of the variables in the data set whose unique values are to be distinguished.
 %     The different possible combinations of these unique values (some of which may be empty)
 %     define the set of combinations to be examined.
 % Outputs:
@@ -19,14 +18,12 @@ function [NConds, NDistinguished, Sizes, Values, CondCombos, Indices] = CondList
 %            Indices(iCond,:) is a list of the sequential numbers of values of the distinguished variable associated with each combination.
 %            That is, values of Indices(:,iDistinguished) always go from 1...Sizes(iDistinguished)
 
-TooSmallCode = -Inf;  % A special code to indicate conditions to be dropped.  NEWJEFF: Change this from 0 for MrF
-
 [Sizes, Values] = GetCondCombos(Trials,ToDistinguish);
 % whos('Values')
 % Drop missing conditions from Values list & reduce Sizes accordingly.
 for iIdx=1:numel(Values)
     % if isnumeric(Values{iIdx})  % Can only eliminate unwanted values of numeric Values types--not strings
-    a =  Values{iIdx}(Values{iIdx}>TooSmallCode);
+    a =  Values{iIdx};
     if numel(a) < numel( Values{iIdx} )
         Sizes(iIdx) = Sizes(iIdx) - 1;
         Values{iIdx} = a;

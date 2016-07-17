@@ -30,8 +30,6 @@ function [TSDResultTable, TSDDVName] = CondTSD_YN(Trials,CondSpecs,sStimVar,sRes
 [CorrectLogLinear, varargin] = ExtractNamei({'LogLinear','Log-linear'},varargin);
 [Correct1Over2N, varargin] = ExtractNamei({'1/2n','1Over2N'},varargin);
 
-assert(numel(varargin)==0,['Unprocessed arguments: ' strjoin(varargin)]);
-
 assert(~(CorrectLogLinear&&Correct1Over2N),'ERROR: At most one type of adjustment for 0/1 probabilities is allowed');
 
 Parametric = ~Nonparametric;
