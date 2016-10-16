@@ -9,6 +9,7 @@ function figout = CondPlot(Trials, DVs, CondSpecs, varargin)
 % Optional input arguments that can appear in any order:
 %   Include/Exclude selection criteria
 %   ThisFun: A function handle indicating what function to compute, if not the mean.
+%   'SaveFile',FileName:  Name of a file name to save the plot (e.g., 'ThisPlot.jpg').
 %   'Figure',FigParms:  FigParms is a cell array of parameters passed to the figure command. e.g., {'Position',[10 10 200 200]}
 % The output is a figure handle
 % The plotted x & y values are averaged over any specifications NOT listed in CondSpecs (this is done in ExtractAsArray).
@@ -17,6 +18,7 @@ function figout = CondPlot(Trials, DVs, CondSpecs, varargin)
 
 [ThisFun, varargin] = ExtractNameVali('Function',@mean,varargin);
 [FigParms, varargin] = ExtractNameVali('Figure',{},varargin);
+[FigName, varargin] = ExtractNameVali('SaveFile','',varargin);
 
 [CondSpecs, nDim] = EnsureCell(CondSpecs);
 
@@ -112,6 +114,8 @@ for iRow=1:NRows
 end
 drawnow;
 
-
+if numel(FigName)>0
+    saveas(figout,FigName);
+end
 
 end

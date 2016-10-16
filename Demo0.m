@@ -1,7 +1,13 @@
+% This demo is intended to be the very first demo for those new to RawRT.
+% The demo is intended to illustrate some of what the software can do,
+% but it is not intended as a tutorial, so there is not much explanation
+% of how to use the different functions.  At this point, those explanations
+% are mostly in the headers of each of the individual functions.
+
 % The goals of this demo are to illustrate how to:
 %   * organize the data within MATLAB
 %   * plot means for a set of conditions
-%   * plot frequency distributions of scores, possibly in each of a set of conditions
+%   * plot frequency distributions of scores, overall, and also in each condition separately
 %   * compute a table of means
 %   * carry out an ANOVA
 

@@ -7,6 +7,7 @@
 %   * count trials excluded by various criteria
 %   * compute and plot condition means including only non-excluded trials
 %   * compute ANOVAs including only non-excluded trials
+%   * examine the condition effect subject by subject
 
 %% Generate some simulated data for a demonstration.
 % Normally, you would start your script by reading in your real data.
@@ -173,4 +174,17 @@ CallMrf(MeansSubByBlkByCond,{'RT'},{},{'Blk','Cond'},'SubNo','BlkCondRT2');
 % which is the same as the ANOVA.
 MeansBlkByCond = CondMeans(MeansSubByBlkByCond,{'RT'},{'Blk','Cond'});
 CondPlot(MeansBlkByCond,'RT','Cond');
+
+
+%% Examine the condition effect subject by subject
+
+RTMeans = CondMeans(Trials,'RT',{'SubNo', 'Cond'},'Include',Trials.IncludeForRT);
+RTMeans2 = unstack(RTMeans,'RT','Cond','NewDataVariableNames',{'Cond1','Cond2','Cond3'});  % Put RTMeans into separate columns by Cond
+sum(RTMeans2.Cond1<RTMeans2.Cond3)
+sum(RTMeans2.Cond1>RTMeans2.Cond3)
+[p,h,stats] = signtest(RTMeans2.Cond3,RTMeans2.Cond1)
+
+% Make a histogram of the effect sizes, subject by subject, with 10 bins.
+figure
+histogram(RTMeans2.Cond3-RTMeans2.Cond1,10)
 

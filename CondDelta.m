@@ -1,4 +1,4 @@
-function [BinMeans, BinDiffsAvgs, DeltaVsMean, DeltaVsMeanNames, BinAssignments] ...
+function [DVBinMeans, BinDiffsAvgs, DeltaVsMean, DeltaVsMeanNames, BinAssignments] ...
  = CondDelta(Trials,sRT,sDV,CondSpecs,sDiffSpec,LevelNums,NBins,PolyDegree,varargin)
 % Delta plot analysis to see how the size of a condition effect changes depending on the size of the RT.
 %
@@ -46,24 +46,25 @@ sTempName = UniqueVarname(Trials,'Bin');
 BinAssignments = CondBinLabels(Trials,sRT,[CondSpecs {sDiffSpec}],NBins,varargin{:});
 Trials.(sTempName) = BinAssignments;
 
-% Compute the mean for each combination of CondSpecs, sDiffSpec, and Bin
-[BinMeans, BinMeanNames] = CondMeans(Trials,sDV,[CondSpecs {sDiffSpec} {sTempName}],varargin{:});
+% Compute the mean for each combination of CondSpecs, sDiffSpec, and Bin for both sorting variable (RT) & dependent variable (DV)
+[RTBinMeans, RTBinMeanNames] = CondMeans(Trials,sRT,[CondSpecs {sDiffSpec} {sTempName}],varargin{:});
+[DVBinMeans, DVBinMeanNames] = CondMeans(Trials,sDV,[CondSpecs {sDiffSpec} {sTempName}],varargin{:});
 
-AvgWeights = zeros(1,numel(unique(BinMeans.(sDiffSpec))));
+AvgWeights = zeros(1,numel(unique(RTBinMeans.(sDiffSpec))));
 AvgWeights(LevelNums) = 0.5;
-[BinAvgs, BinAvgsNames] = CondWeightedSum(BinMeans,BinMeanNames,[CondSpecs {sTempName}],sDiffSpec,AvgWeights);
-sAvgsName = UniqueVarname(BinAvgs,'BinAvgs');
-BinAvgs.Properties.VariableNames{end} = sAvgsName;
+[RTBinAvgs, RTBinAvgsNames] = CondWeightedSum(RTBinMeans,RTBinMeanNames,[CondSpecs {sTempName}],sDiffSpec,AvgWeights);
+sAvgsName = UniqueVarname(RTBinAvgs,[sRT 'BinAvgs']);
+RTBinAvgs.Properties.VariableNames{end} = sAvgsName;
 
 DiffWeights = zeros(size(AvgWeights));
 DiffWeights(LevelNums(1)) = -1;
 DiffWeights(LevelNums(2)) = 1;
-[BinDiffs, BinDiffsNames] = CondWeightedSum(BinMeans,BinMeanNames,[CondSpecs {sTempName}],sDiffSpec,DiffWeights);
+[DVBinDiffs, DVBinDiffsNames] = CondWeightedSum(DVBinMeans,DVBinMeanNames,[CondSpecs {sTempName}],sDiffSpec,DiffWeights);
 
 % Assemble averages and differences into a single table
-BinDiffsAvgs = BinAvgs;
-sDiffsName = UniqueVarname(BinDiffsAvgs,'BinDiffs');
-BinDiffsAvgs.(sDiffsName) = BinDiffs.(BinDiffsNames{1});
+BinDiffsAvgs = RTBinAvgs;
+sDiffsName = UniqueVarname(BinDiffsAvgs,[sDV 'BinDiffs']);
+BinDiffsAvgs.(sDiffsName) = DVBinDiffs.(DVBinDiffsNames{1});
 
 [DeltaVsMean, DeltaVsMeanNames] = CondCorrs(BinDiffsAvgs,sAvgsName,sDiffsName,CondSpecs,PolyDegree);
 

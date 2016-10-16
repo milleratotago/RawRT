@@ -48,6 +48,8 @@ elseif strcmpi(sName,'DemoTSD_YN')
     Trials = DemoTSD_YNData;
 elseif strcmpi(sName,'DemoSRCrosstab')
     Trials = DemoSRCrosstab;
+elseif strcmpi(sName,'DemoSpearKar')
+    Trials = DemoSpearKar;
 else
     abort(['Unrecognized demo data set name: ' sName]);
 end
@@ -290,4 +292,15 @@ function Trials = DemoSRCrosstab
 Trials = DemoData('Demo0');
 Trials.Resp=randi(3,height(Trials),1);
 
+end
+
+
+function Trials = DemoSpearKar
+NStims = 6;
+Trials = DemoData('Demo0');
+Trials.Stim = 100*randi(NStims,height(Trials),1);
+Trials.Threshold = randi(100*NStims,height(Trials),1);  % a momentary threshold that the stimulus must exceed to be called "larger"
+Trials.Resp = 2*ones(height(Trials),1);  % Default response is 2 = 'larger'
+Trials.Resp(Trials.Stim<Trials.Threshold) = 1;
+Trials.Threshold = [];
 end

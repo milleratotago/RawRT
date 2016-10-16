@@ -6,6 +6,14 @@ function [outTallTable, outResultTable, outDVName, AllStims, AllResps] = CondSRC
 % Optional parameters:
 %    'NoTall': Do not bother to compute outTallTable
 %    Include/Exclude options passed through to SubTableIndices.
+%
+% Outputs:
+%    outTallTable: This table has each count appearing in a different row, with labels for all of the CondSpecs and response.
+%    outResultTable: This table has the counts appearing as a vector within a single SRCounts DV, in the order Cond1Resp1, Cond1Resp2, Cond1Resp3, ...Cond2Resp1, ...
+%    outDVName:
+%    AllStims: a list of all stimulus values that were found (across all conditions)
+%    AllResps: a list of all response values that were found.
+
 
 [NoTall, varargin] = ExtractNamei({'NoTall','No Tall'},varargin);
 

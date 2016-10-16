@@ -48,11 +48,10 @@ sort(Trials.RT(Trials.RTOK&Trials.SubNo==SubToCheck&Trials.Cond==CondToCheck&Tri
 
 % Here are frequency distributions that allow you to compare the RTs in the different bins, pooling across Ss:
 CondFreqDist(Trials,'RT',{'CAFBinNum','Cond'},'Include',Trials.RTOK);
-% Note that the X ranges vary across panels of the graph, because MATLAB
-% chooses the ranges separately for each.
-% Note that the bins of these distributionsdo overlap; this happens because the bin boundaries are at
-% different points for different Ss, even though the bins don't overlap for
-% any subject/condition.
+% Notes:
+%  o The X ranges vary across panels of the graph, because MATLAB chooses the ranges separately for each.
+%  o The bins of these distributions do overlap; this happens because the bin boundaries are at
+%    different points for different Ss, even though the bins don't overlap for any subject/condition.
 
 
 %% Conditional accuracy functions:
