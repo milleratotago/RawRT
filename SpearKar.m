@@ -19,6 +19,13 @@ function [PSE_SK, Sigma_SK, DL_SK, BootstrapMeans, BootstrapSEMs, BootstrapCIs, 
 [WantPlot, varargin] = ExtractNamei('Plot',varargin);
 assert(numel(varargin)==0,['Unprocessed arguments: ' strjoin(varargin)]);
 
+% Must remove any stims that were never tested.
+% If this is not done, the routine produces NaN's.
+totaln = n1 + n2;
+n1 = n1(totaln>0);
+n2 = n2(totaln>0);
+stim = stim(totaln>0);
+
 [nTrials, fi, fiMono] = monotonize(n1, n2);
 
 %% Spearman-Kaerber estimate
