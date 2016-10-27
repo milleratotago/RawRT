@@ -26,6 +26,21 @@ legend('Cond 3','Cond 2','Cond 1');
 legend('Location','SouthEast');
 
 
+%% Compute and plot Vincentized averages with CondCDFs
+
+% Pool all blocks and conditions into a single CDF for each subject, & Vincentize across Ss:
+[Vinc1, PrctNames] = CondCDFs(Trials,'RT',{},{'SubNo'},WantPrctiles,'Include',Trials.RTOK,'Plot');
+
+% Pool all blocks into a single CDF for each condition & subject, & Vincentize across Ss:
+[Vinc2, PrctNames] = CondCDFs(Trials,'RT',{'Cond'},{'SubNo'},WantPrctiles,'Include',Trials.RTOK,'Plot');
+
+% Compute a separate CDF for each condition & block combination, & Vincentize across Ss:
+[Vinc3, PrctNames] = CondCDFs(Trials,'RT',{'Cond','Blk'},{'SubNo'},WantPrctiles,'Include',Trials.RTOK,'Plot');
+
+% Compute a separate CDF for each condition, block, & subject, then Vincentize across Ss & blocks:
+[Vinc4, PrctNames] = CondCDFs(Trials,'RT',{'Cond'},{'SubNo','Blk'},WantPrctiles,'Include',Trials.RTOK,'Plot');
+
+
 %% Get percentages in various bins and average those.:
 % Note that BinTops(1) is really the bin bottom.
 

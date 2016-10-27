@@ -84,7 +84,7 @@ CompareLevels = [1 2]; % Measure condition effect as condition 2 minus condition
 % The outputs of CondDelta can be used in many ways.  Here are some examples:
 
 % Plot the bin's condition effect on the vertical axis against the bin's mean RT on the horizontal:
-CondPlot(RTBinDiffsAvgs,{'BinAvgs','BinDiffs'},'Bin');
+CondPlot(RTBinDiffsAvgs,{'RTBinAvgs','RTBinDiffs'},'Bin');
 
 % Do an ANOVA to see whether the Cond effect changes significantly across bins:
 CallMrf(RTBinMeans,'RT',{},{'Bin','Cond'},'SubNo','DemoBinDPRT1');

@@ -62,7 +62,7 @@ CondPlot(Trials,'RT','Cond','Function',@std);      % Plot the std deviation of R
 
 FreqDist(Trials,'RT');   % across all trials
 CondFreqDist(Trials,'RT','Cond');  % separately for each condition
-
+CondFreqDist(Trials,'RT','Cond','Edges',100:50:800);  % Use lower bin edges from 100 to 800 by 50
 
 %% Compute the means for each subject in each condition:
 MeansTable = CondMeans(Trials,'RT',{'SubNo','Cond'});

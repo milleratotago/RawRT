@@ -7,7 +7,10 @@ function [figout, hist] = CondFreqDist(Trials, sDV, CondSpecs, varargin)
 % listed in CondSpecs (this is done in ExtractAsArray).
 % Optional input argument:
 %   Include/Exclude selection criteria
+%   'Edges',100:50:500  Use bin lower edges of 100,150,200,250...500
 % The output is an array of figure handles
+
+[edges, varargin] = ExtractNameVali('Edges',[],varargin);
 
 [SelectedTrials, varargin] = MaybeSelect(Trials,varargin{:});
 
@@ -57,7 +60,11 @@ for iDV=1:NDVs
             if NSpecs>=ColDim
                 sSelect = [sSelect '&' 'SelectedTrials.' CondSpecs{2} '==' num2str(CondCombos(iPlot,2))];
             end
-            hist{iRow,iCol,iDV} = histogram(SelectedTrials.(ThisDV)(eval(sSelect)));
+            if numel(edges)>0
+                hist{iRow,iCol,iDV} = histogram(SelectedTrials.(ThisDV)(eval(sSelect)),edges);
+            else
+                hist{iRow,iCol,iDV} = histogram(SelectedTrials.(ThisDV)(eval(sSelect)));
+            end
 %             ylabel(yDV);
              xlabel(ThisDV);
             % Maybe add a title to the panel if there are multiple subplots

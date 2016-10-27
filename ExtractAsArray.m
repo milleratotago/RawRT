@@ -4,6 +4,7 @@ function varargout = ExtractAsArray(Trials,sDV,CondSpecs,varargin)
 % Optional arguments:
 %   Include/Exclude
 %   Function: A function handle indicating what function to compute, if not the mean.
+% Problem: If each value of sDV is itself a vector (e.g., Prctiles), then only the first element is returned.
 
 [Trials, varargin] = MaybeSelect(Trials,varargin{:});
 

@@ -1,9 +1,9 @@
-function [NConds, NDistinguished, Sizes, Values, CondCombos, Indices] = CondList(Trials,ToDistinguish)
+function [NConds, NDistinguished, Sizes, Values, CondCombos, Indices] = CondList(Trials,CondSpecs)
 % Define the _combinations_ of conditions to be examined, as determined by the
 %   to-be-distinguished labels.
 % Inputs:
 %   Trials: a "table" data set
-%   ToDistinguish: the names of the variables in the data set whose unique values are to be distinguished.
+%   CondSpecs: the names of the variables in the data set whose unique values are to be distinguished.
 %     The different possible combinations of these unique values (some of which may be empty)
 %     define the set of combinations to be examined.
 % Outputs:
@@ -18,7 +18,7 @@ function [NConds, NDistinguished, Sizes, Values, CondCombos, Indices] = CondList
 %            Indices(iCond,:) is a list of the sequential numbers of values of the distinguished variable associated with each combination.
 %            That is, values of Indices(:,iDistinguished) always go from 1...Sizes(iDistinguished)
 
-[Sizes, Values] = GetCondCombos(Trials,ToDistinguish);
+[Sizes, Values] = GetCondCombos(Trials,CondSpecs);
 % whos('Values')
 % Drop missing conditions from Values list & reduce Sizes accordingly.
 for iIdx=1:numel(Values)

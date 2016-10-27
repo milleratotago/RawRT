@@ -157,6 +157,7 @@ CallMrf(Trials,DVs,BetweenFac,WithinFac,SubFac,OutFileName,'Include',Trials.Incl
 %% To have a closer look, examine separate frequency distributions of RT for each condition/block:
 CondFreqDist(Trials,'RT','Cond','Include',Trials.IncludeForRT); % Make separate FDs for each condition for selected trials.
 CondFreqDist(Trials,'RT',{'Blk','Cond'},'Include',Trials.IncludeForRT); % Make separate FDs for each condition for selected trials.
+CondFreqDist(Trials,'RT',{'Blk','Cond'},'Include',Trials.IncludeForRT,'Edges',150:10:400); % Just look at the lower tail by specifying low bin edges.
 
 
 %% Next, make & process tables of subject means rather than the starting table of individual trials.
