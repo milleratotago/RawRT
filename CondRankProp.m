@@ -1,5 +1,6 @@
-function outRanks = CondRanks(inTrials,sDV,CondSpecs,varargin)
-% For each CondSpecs combination of conditions, rank the trials on inTable.(sDV).
+function outVals = CondRankProp(inTrials,sDV,CondSpecs,varargin)
+% For each CondSpecs combination of conditions, rank the trials on inTable.(sDV),
+%  then output Rank/N, where N is the number of trials in that condition.
 % Inputs:
 %
 %   inTrials  : table holding the trial-by-trial data for all subjects and conditions
@@ -12,12 +13,12 @@ function outRanks = CondRanks(inTrials,sDV,CondSpecs,varargin)
 %
 % Outputs:
 %
-%   outRanks : List indicating rank for each trial.
+%   outVals : List indicating rank for each trial.
 
 [AvgTies, varargin] = ExtractNamei('AvgTies',varargin);
 
 NinTrials = height(inTrials);
-outRanks = NaN(NinTrials,1);
+outVals = NaN(NinTrials,1);
 
 [mySubTableIndices, CondLabels] = SubTableIndices(inTrials,CondSpecs,varargin{:});
 
@@ -26,13 +27,13 @@ NConds = height(CondLabels);
 for iCond = 1:NConds
     Indices = mySubTableIndices{iCond};
     TheseVals = inTrials.(sDV)(Indices);
-%     nItems = numel(TheseVals);
+    nItems = numel(TheseVals);
     if AvgTies
        rank_vector = tiedrank(TheseVals);
     else
        [~,~,rank_vector] = unique(TheseVals);
     end
-    outRanks(Indices) = rank_vector;
+    outVals(Indices) = rank_vector / nItems;
 end
 
 end

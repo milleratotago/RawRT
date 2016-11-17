@@ -11,15 +11,28 @@ function [outResultTable, outDVNames] = CondRMItable(inTrials,sDV,sRMISpec,CondS
 %   Prctiles  : Vector of numbers 0-1 indicating the cumulative proportions at which to check the RMI
 %             : (If max(Prctiles)>1, it is assumed that the numbers are percentiles instead of proportions.)
 %   SOA       : time from onset of Single1 to onset of Single2; negative means Single2 was first
+%
 % varargin options:
-%   Include/Exclude options passed through.
+%
+%   Include/Exclude options passed through as usual.
+%
+%   'KTTsimple' : performs the "kill-the-twin" analysis for a simple RT task.
+%                 If this option is specified, then the variable sRMISpec should be coded 0-3 rather than 1-3,
+%                 with a value of 0 indicating the catch trials.  The value of sDV should be some very large
+%                 number for these trials.
+%                 When this option is specified, make sure that the relevant catch trials are NOT excluded
+%                 (e.g., excluded by analyzing correct only or by excluding trials with large RTs)
+%                 by the Include/Exclude specification.
+%                 
 %   'SaveNaNs' indicates that the output should include rows for which all computed values are NaNs.
 %             By default these all-NaN rows are deleted.
 %
 % Outputs:
 %
 %   CDFsTable : Labelled by CondSpecs, Single1/Single2/Redundant/SumSingle; DVs = Prctiles
+%               If KTTsimple is specified, then SumSingle is actually SumSingle-CatchCDF to kill twins.
 
+[KTTsimple, varargin] = ExtractNamei('KTTsimple',varargin);
 [SaveNaNs, varargin] = ExtractNamei('SaveNaNs',varargin);
 DropNaNs = ~SaveNaNs;
 
@@ -52,6 +65,9 @@ for iCond=1:NConds
     aX = TheseTrials.(sDV)(TheseTrials.(sRMISpec)==1);
     aY = TheseTrials.(sDV)(TheseTrials.(sRMISpec)==2);
     aRed = TheseTrials.(sDV)(TheseTrials.(sRMISpec)==3);
+    if KTTsimple
+       aCatch = TheseTrials.(sDV)(TheseTrials.(sRMISpec)==0);
+    end
     %    aX=sort(aX);
     %    aY=sort(aY);
     %    aRed=sort(aRed);

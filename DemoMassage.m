@@ -29,6 +29,13 @@ Trials.RankofRT = CondRanks(Trials,'RT',{'SubNo','Cond'});
 RankDescribe = CondDescribe(Trials,'RankofRT',{'SubNo','Cond'})
 
 
+%% Compute the rank of each trial relative to the other trials from the same subject and condition as a proportion 0-1.
+Trials.RankPropofRT = CondRankProp(Trials,'RT',{'SubNo','Cond'});
+% You might use these RankProp, for example, to exclude trials in the top and bottom 10%.
+
+RankPropDescribe = CondDescribe(Trials,'RankPropofRT',{'SubNo','Cond'})
+
+
 %% Split the trials from the same subject and condition into subgroups.
 NSubgroups = 3;
 Randomize = true;
