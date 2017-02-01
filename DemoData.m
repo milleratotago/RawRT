@@ -125,12 +125,13 @@ NSubsPerGroup = 10;
 
 FNames  = {'SubNo',        'Group',  'Blk', 'Cond', 'Replic'};
 FLevels = [NSubsPerGroup    NGroups        4       2      40    ];
-Trials = TrialFrame(FNames,FLevels,'Shuffle','Drop','Replic','SortBy',{'Group','SubNo','Blk'});
+Trials = TrialFrame(FNames,FLevels,'Shuffle','Drop','Replic','SortBy',{'Group','SubNo','Blk'},'Between',{'Group','SubNo'});
 NTrials = height(Trials);
 
+% NEWJEFF: NEXT LINE NO LONGER NEEDED BECAUSE TRIALFRAME NOW KNOWS ABOUT BETWEEN-Ss FACTORS
 % At this point there are subjects 1-10 in each group, but the analysis routines
 % assume that each different subject has a unique number.  Fix that:
-Trials.SubNo = Trials.SubNo + NSubsPerGroup*(Trials.Group-1);
+% Trials.SubNo = Trials.SubNo + NSubsPerGroup*(Trials.Group-1);
 
 % Generate RTs:
 RTmn = 500;

@@ -53,7 +53,13 @@ Values=cell(1,ndims);
 for i=1:ndims
 %    ConditionDistinguished{i}
 %    Trials.Properties.VariableNames
-    Values{i}=unique(Trials.(ConditionDistinguished{i}));
+    try
+       Values{i}=unique(Trials.(ConditionDistinguished{i}));
+    catch
+        temp = ConditionDistinguished{i}
+        temp2 = class(temp)
+        assert(false,[temp ' is not a legal variable name string.']);
+    end
     Sizes(i)=numel(Values{i});
 end
 end

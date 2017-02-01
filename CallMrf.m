@@ -19,6 +19,7 @@ function sysResult = CallMrf(Trials,sDV,BetweenFacs,WithinFacs,SubjectSpec,sOutF
 %   'Notepad',sNotepadLines: A possibly multi-line string, each line starting with '*', which is to be written to LGF file as notepad lines.
 %   'NoNotepad': Don't write any notepad lines into the output FPR file.
 %   'Path',sPath: A path that is to be added to the DOS path.  This indicates where mrfb.exe and mrfub.exe are found.
+%                 The path should include backslashes but no final backslash, e.g.: 'Path','C:\binw\jpas'
 %                 The path is removed from the DOS path at the end of this function.
 
 % Notes for programmers about the DOS path:  NewJeff
@@ -121,7 +122,7 @@ if NGroups>1
     for iGroup=1:NGroups-1
         for jGroup=iGroup+1:NGroups
             iSet = intersect(GroupList{iGroup},GroupList{jGroup});
-            assert(numel(iSet)==0,['ERROR: Subjects ' num2str(iSet) ' belongs to more than one group.']);
+            assert(numel(iSet)==0,['ERROR: Subjects ' num2str(iSet') ' belongs to more than one group.']);
         end
     end
 end
