@@ -25,9 +25,9 @@ function [p, tbl, stats] = CallAnovan(Trials,sDV,BetweenFacs,WithinFacs,SubjectS
 NExptlFacs = NBetweenFacs + NWithinFacs;
 
 % Extract the optional arguments:
-[ThisFun, varargin] = ExtractNameVali('Function',@mean,varargin);
+[ThisFun, varargin] = ExtractNameVali('Function',0,varargin);  % e.g., @mean
 [NoDisplay,  varargin] = ExtractNamei({'NoDisplay','NoLoad'},varargin);
-[WantMean,  varargin] = ExtractNamei({'Mean','WantMean','AddMean','Mu'},varargin);
+[WantMean,  varargin] = ExtractNamei({'Mean','WantMean','WantMu','AddMean','Mu'},varargin);
 
 % **************** Select the Included/Excluded data.
 % This must be done before checking factors, because the selected
@@ -88,7 +88,11 @@ SubCondCombos = [SubjectSpec WithinFacs];  % Subject factor assumed first
 
 % **************** Compute the values of the DVs that are to be analyzed:
 
-[MeansToUse, MeanDVNames] = CondFunsOfDVs(Trials,sDV,SubCondCombos,ThisFun);
+if isa(ThisFun,'function_handle')
+    [MeansToUse, MeanDVNames] = CondFunsOfDVs(Trials,sDV,SubCondCombos,ThisFun);
+else
+    MeansToUse = Trials;
+end
 OneIsMissing = ismissing(MeansToUse);
 NofNans = sum(OneIsMissing(1:end));
 assert(NofNans==0,['ANOVA aborted because ' num2str(NofNans) ' empty cell(s) found.']);

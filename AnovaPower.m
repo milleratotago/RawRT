@@ -1,6 +1,9 @@
 classdef AnovaPower < handle
     % Class to perform power-related computations with Anova tables
-    % Can also be used to generate & accumulate simulation results.
+    % Can also be used to generate & tabulate simulation results.
+
+    % NEWJEFF: Note that MATLAB uses AS as the error term for S, etc,
+    % when there are within-Ss factors & replications.
     
     properties
         
@@ -19,6 +22,7 @@ classdef AnovaPower < handle
         NSubsPerGrp      % Number of subjects per group
         NSubsTotal
         UniqueSubs       % A list of the subject numbers.
+        NReplications    % Number of trials per subject per condition
         
         SubjectSpec      % String names of the subjects factor
         
@@ -42,7 +46,9 @@ classdef AnovaPower < handle
                          % The entry cell array has a list of the factors across
                          % which the error term must sum to 0; e.g. 'A' and 'B' for ABS.
         RVerr            % A cell array, one per source, of the random variables used for the different error terms.
-        
+        ErrSrcName       % A cell array, one per source, of the _variable names_ used for the error sources when generating simulated data.
+        TrialVariance       % Error variance divided by NReplications.
+
     end  % properties
     
     methods (Static)
@@ -63,9 +69,13 @@ classdef AnovaPower < handle
     
     methods
         
-        function obj=AnovaPower(dummyTrials,passBetweenFacs,passWithinFacs,passSubjectSpec)
-            % Initialize based on the information in Trials.
+        function obj=AnovaPower(dummyTrials,passBetweenFacs,passWithinFacs,passSubjectSpec,varargin)
+            % Define the object & perform some initialization.
             
+            [obj.NReplications, varargin] = ExtractNameVali({'NReplications','Replications','Replication','NTrials'},1,varargin);
+
+            assert(numel(varargin)==0,['Unprocessed arguments: ' strjoin(varargin)]);
+
             obj.BetweenFacs = passBetweenFacs;
             obj.WithinFacs  = passWithinFacs;
             obj.SubjectSpec = passSubjectSpec;
@@ -92,7 +102,7 @@ classdef AnovaPower < handle
             % Create a fake DV & analyze it with anovan to determine the ANOVA table structure.
             sDV = UniqueVarname(dummyTrials,'DV');
             dummyTrials.(sDV) = zeros(height(dummyTrials),1);
-            [~, tbl1, ~] = CallAnovan(dummyTrials,sDV,obj.BetweenFacs,obj.WithinFacs,obj.SubjectSpec,'Mean','NoDisplay');
+            [~, tbl1, ~] = CallAnovan(dummyTrials,sDV,obj.BetweenFacs,obj.WithinFacs,obj.SubjectSpec,'WantMu','NoDisplay');
             obj.tbl = anovantbl2table(tbl1);
             obj.NSources = height(obj.tbl);
             obj.NWithinSources = 2^obj.NWithinFacs - 1;
@@ -150,10 +160,6 @@ classdef AnovaPower < handle
             if nUsed < numel(SigmaList)
                 warning(['Ignored last ' num2str(numel(SigmaList)-nUsed) ' values in SigmaList.']);
             end
-%             for iSrc=1:numel(obj.RandomSources)
-%                 newjff1 = obj.tbl.Properties.RowNames{obj.RandomSources(iSrc)}
-%                 newjff2 = obj.tbl.Sigma(obj.RandomSources(iSrc))
-%             end
         end
         
         function setThetaSqrs(obj,passTrueMeans)
@@ -162,6 +168,8 @@ classdef AnovaPower < handle
             % in a decomposition of the true means.  This measure depends only
             % on the effect size for that source--not on the presence of additional
             % factors in the design.
+            % Note that many books define ThetaSqr differently, dividing the value
+            % obtained here by the number of df's or conditions in the source.
             obj.TrueMeans = passTrueMeans;
             dummytbl1 = Decompose(obj.AllFacLevels, obj.TrueMeans, obj.ExptlFacs);
             dummytbl = anovantbl2table(dummytbl1);
@@ -181,29 +189,33 @@ classdef AnovaPower < handle
         
         function setNoncentralities(obj)
             % ThetaSqr & Sigma terms must already exist.
-            % NEWJEFF: INCLUDE TRIALS ERROR TERM
             obj.tbl.Noncentrality = NaN(obj.NSources,1);
+            obj.TrialVariance = obj.tbl.Sigma('Error')^2/obj.NReplications;
             for jSource = 1:numel(obj.FixedSources)
                 iSource = obj.FixedSources(jSource);
                 % In general, noncen = N * thetasqr / sigma^2 where N is the number of Ss at
-                % each combination of factor levels defining the means used to compute the source.
+                % each combination of factor levels defining the means used to compute the source
+                % and sigma^2 is the error variance associated with the source.
                 sSource = obj.tbl.Properties.RowNames{iSource};
-                UninvolvedFacs = obj.MissingFacs(sSource,obj.BetweenFacs);
-                NUninvolved = prod(obj.BetweenFacLevels(UninvolvedFacs));
-                thisN = obj.NSubsPerGrp * NUninvolved;
-                obj.tbl.Noncentrality(iSource) = thisN * obj.tbl.ThetaSqr(iSource) / obj.tbl.Sigma(obj.tbl.ET(iSource))^2 ;
+                UninvolvedBetFacs = obj.MissingFacs(sSource,obj.BetweenFacs);
+                NUninvolvedBet = prod(obj.BetweenFacLevels(UninvolvedBetFacs));
+                UninvolvedWitFacs = obj.MissingFacs(sSource,obj.WithinFacs);
+                NUninvolvedWit = prod(obj.WithinFacLevels(UninvolvedWitFacs));
+                thisN = obj.NSubsPerGrp * NUninvolvedBet;
+                ErrVar = obj.tbl.Sigma(obj.tbl.ET(iSource))^2 + obj.TrialVariance / NUninvolvedWit;
+                obj.tbl.Noncentrality(iSource) = thisN * obj.tbl.ThetaSqr(iSource) / ErrVar ;
             end
         end
         
         function setOmegaSqrs(obj)
-            % omega^2 = sigma^2(AB)/(sigma^2(AB)+sigma^2(ABS)+sigma^2(error))
+            % omega^2 = sigma^2(AB)/(sigma^2(AB)+sigma^2(ABS)+sigma^2(error)/NReplications)
             % tbl.ThetaSqr & tbl.Sigma must already exist
-            % NEWJEFF: INCLUDE TRIALS ERROR TERM
+            % NEWJEFF: NOT SURE HOW OmegaSqr is defined when TrialVariance>0.
             obj.tbl.OmegaSqr = NaN(obj.NSources,1);
             obj.tbl.OmegaSqr(obj.FixedSources) = obj.tbl.ThetaSqr(obj.FixedSources) ./ ...
                 ( obj.tbl.ThetaSqr(obj.FixedSources) ...
                 + obj.tbl.Sigma(obj.tbl.ET(obj.FixedSources)).^2 ...
-                + obj.tbl.Sigma('Error') );
+                + obj.TrialVariance );
         end
         
         function setCohenfSqrs(obj)
@@ -217,7 +229,6 @@ classdef AnovaPower < handle
             obj.setFcrits(alpha);
             obj.setSigmas(TrueSigmas);
             obj.setThetaSqrs(TrueMeans);
-            %             obj.setFracSubs;
             obj.setNoncentralities;
             obj.tbl.Power = NaN(obj.NSources,1);
             for jSource = 1:numel(obj.FixedSources)
@@ -232,17 +243,19 @@ classdef AnovaPower < handle
             obj.tbl.obsSigp = zeros(obj.NSources,1);
             obj.tbl.obsTtlMS = zeros(obj.NSources,1);
             obj.NSims = 0;
+            tempRepname = 'tempRepnameHGHK';
             if obj.NBetweenFacs>0
-                obj.SimTrials = TrialFrame([obj.ExptlFacs cellstr(obj.SubjectSpec)],[obj.AllFacLevels obj.NSubsPerGrp], ...
-                    'Between',{obj.BetweenFacs,obj.SubjectSpec});
+                obj.SimTrials = TrialFrame([obj.ExptlFacs {obj.SubjectSpec} {tempRepname}],[obj.AllFacLevels obj.NSubsPerGrp obj.NReplications], ...
+                    'Between',{obj.BetweenFacs,obj.SubjectSpec},'DropVar',tempRepname);
             else
-                obj.SimTrials = TrialFrame([obj.ExptlFacs {obj.SubjectSpec}],[obj.AllFacLevels obj.NSubsPerGrp]);
+                obj.SimTrials = TrialFrame([obj.ExptlFacs {obj.SubjectSpec} {tempRepname}],[obj.AllFacLevels obj.NSubsPerGrp obj.NReplications],'DropVar',tempRepname);
             end
             obj.SimTrials.True = CondAssign(obj.SimTrials,obj.ExptlFacs,obj.TrueMeans);
             % obj.SimTrials.pSig = nan(height(obj.SimTrials),1);
             % Make the error term RVs & a list of the constraints for each error term:
             % Also determine whether each source contains the subject term:
             obj.RVerr = cell(obj.NSources,1);
+            obj.ErrSrcName = cell(obj.NSources,1);
             obj.ErrConstraints = cell(obj.NSources,1);
             obj.SrcWithSub = false(obj.NSources,1);
             for jSource = 1:numel(obj.RandomSources)
@@ -251,11 +264,8 @@ classdef AnovaPower < handle
                     obj.RVerr{iSource} = Normal(0,obj.tbl.Sigma(iSource));
                     obj.ErrConstraints{iSource} = obj.FindWithinErrorComponents(iSource);
                 end
+                obj.ErrSrcName{iSource} = UniqueVarname(obj.SimTrials,[obj.tbl.Properties.RowNames{iSource} 'err']);
                 obj.SrcWithSub(iSource) = numel(strfind(obj.tbl.Properties.RowNames{iSource},obj.SubjectSpec))>0;
-%                 if obj.SrcWithSub(iSource)
-%                     newjff = obj.tbl.Properties.RowNames(iSource)
-%                     newjff2 = obj.SubjectSpec
-%                 end
             end % for jSource
         end
         
@@ -278,36 +288,33 @@ classdef AnovaPower < handle
         end
         
         function TtlErr = SimTtlErr(obj)
-            % Generate the sum of the random error terms for one simulated sample.
+            % Generate & total the random error terms for one simulated sample.
             NTrials = numel(obj.SimTrials.True);
             TtlErr = zeros(NTrials,1);
             for jSource = 1:numel(obj.RandomSources)
                 iSource = obj.RandomSources(jSource);
+                thisErrName = obj.ErrSrcName{iSource};
                 if obj.SrcWithSub(iSource)
-%                     newjff = iSource
-%                     class(obj.RVerr{iSource})
-                    obj.SimTrials.ThisErr = CondRand(obj.SimTrials,[obj.ErrConstraints{iSource}{:} cellstr(obj.SubjectSpec)],obj.RVerr{iSource});
+                    obj.SimTrials.(thisErrName) = CondRand(obj.SimTrials,[obj.ErrConstraints{iSource}{:} cellstr(obj.SubjectSpec)],obj.RVerr{iSource});
+                else
+                    obj.SimTrials.(thisErrName) = randn(NTrials,1)*obj.tbl.Sigma(iSource);
                 end
-                if numel(obj.ErrConstraints{iSource})>0
+                if obj.SrcWithSub(iSource) && (numel(obj.ErrConstraints{iSource})>0)
                     % Center the error terms for each subject across the relevant within-Ss factors
                     for iSub=1:obj.NSubsTotal
-                        obj.SimTrials.ThisErr = CondCenter(obj.SimTrials,'ThisErr',obj.ErrConstraints{iSource}, ...
+                        obj.SimTrials.(thisErrName) = CondCenter(obj.SimTrials,thisErrName,obj.ErrConstraints{iSource}, ...
                             'Include',obj.SimTrials.(obj.SubjectSpec)==obj.UniqueSubs(iSub));
                     end
-                elseif ~obj.SrcWithSub(iSource)
-                    obj.SimTrials.ThisErr = randn(NTrials,1)*obj.tbl.Sigma(iSource);
                 end
-                obj.SimTrials.(['ErrNewJeff' num2str(iSource)]) = obj.SimTrials.ThisErr;
-                TtlErr = TtlErr + obj.SimTrials.ThisErr;
+                TtlErr = TtlErr + obj.SimTrials.(thisErrName);
             end % for jSource
         end
         
         function SimulateOne(obj)
             obj.NSims = obj.NSims + 1;
             obj.SimTrials.Y = obj.SimTrials.True + obj.SimTtlErr;
-            [~, simtbl1] = CallAnovan(obj.SimTrials,'Y',obj.BetweenFacs,obj.WithinFacs,obj.SubjectSpec,'Mean','NoDisplay');
+            [~, simtbl1] = CallAnovan(obj.SimTrials,'Y',obj.BetweenFacs,obj.WithinFacs,obj.SubjectSpec,'WantMu','NoDisplay');  % optionally pass a summary function here ???
             simtbl = anovantbl2table(simtbl1);
-            % simtbl.pSig = nan(height(simtbl),1);
             for iSource=1:(height(simtbl)-1)
                 if simtbl.df(iSource)>0
                     obj.tbl.obsTtlMS(iSource) = obj.tbl.obsTtlMS(iSource) + simtbl.MeanSq{iSource};
@@ -323,10 +330,11 @@ classdef AnovaPower < handle
         end
         
         function Report(obj)
-            % NewJeff: option to report only fixed lines
+            % NewJeff: add an option to print to a file
+            % NewJeff: add an option to report only fixed lines
             Conf = .99;  % Confidence intervals for p use this confidence level
-            ColHdr = {'Source', 'df', 'Fcrit', 'ThetaSqr', 'Noncen', 'OmegaSqr', 'CohenfSqr', 'Power' , 'EMS', 'ObsPrSig', 'LoBnd', 'UpBnd'};
-            ColWid = {    '12',  '5',     '7',       '14',     '14',       '10',        '11',     '8' ,  '12',       '10',     '8',     '8'};
+            ColHdr = {'Source', 'df', 'Fcrit', 'ThetaSqr', 'Noncen', 'OmegaSqr', 'CohenfSqr', 'Power' , 'obsEMS', 'ObsPrSig', 'LoBnd', 'UpBnd'};
+            ColWid = {    '12',  '5',     '7',       '14',     '14',       '10',        '11',     '8' ,     '12',       '10',     '8',     '8'};
             ReportSims = obj.NSims > 0;
             if ReportSims
                 sSimTxt = [' with ' num2str(obj.NSims) ' simulations'];
