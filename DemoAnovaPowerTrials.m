@@ -27,12 +27,15 @@ SubName = 'S';
 NSubsPerGroup = 6;
 
 TrueMeans = [ ...   % 2x5
-    310 320 330 340 350 ...  % A1-5
+   310 320 330 340 350 ...  % A1-5
+%     -20 -10 0 10 20 ...  % A1-5
     ];
 
+TrueMeans = TrueMeans - 310;
+
 TrueSigmas = [...  % MUST MATCH ORDER OF RANDOM SOURCES IN TABLE PRODUCED BY ANOVAN
-   114.0 ... % S
-    26.0 ... % AS
+    14.0 ... % S
+     6.0 ... % AS
     TrialError ... % Error
     ];
 
@@ -92,6 +95,8 @@ TrueMeans = [ ...   % 2x5
     340 350 360 470 480 ...  % A1
     300 300 305 300 390 ...  % A2
     ];
+
+TrueMeans = TrueMeans - 250;
 
 TrueSigmas = [...  % MUST MATCH ORDER OF RANDOM SOURCES IN TABLE PRODUCED BY ANOVAN
     14.0 ... % S

@@ -47,7 +47,8 @@ classdef AnovaPower < handle
                          % which the error term must sum to 0; e.g. 'A' and 'B' for ABS.
         RVerr            % A cell array, one per source, of the random variables used for the different error terms.
         ErrSrcName       % A cell array, one per source, of the _variable names_ used for the error sources when generating simulated data.
-        TrialVariance       % Error variance divided by NReplications.
+        TrialVariance    % Error variance divided by NReplications.
+        simtbl           % Holds ANOVA from one simulation (the last).
 
     end  % properties
     
@@ -237,6 +238,19 @@ classdef AnovaPower < handle
             end
             obj.setOmegaSqrs;
             obj.setCohenfSqrs;
+            % Set power for tests of subjects effects from here
+            if obj.NReplications > 1
+                dfError = obj.tbl.df('Error');
+                for jSource = 1:numel(obj.RandomSources)-1  % Skip Error source at the end
+                    iSource = obj.RandomSources(jSource);
+                    sSource = obj.tbl.Properties.RowNames{iSource};
+                    UninvolvedWitFacs = obj.MissingFacs(sSource,obj.WithinFacs);
+                    NUninvolvedWit = prod(obj.WithinFacLevels(UninvolvedWitFacs));
+                    Kappa = 1 + obj.tbl.Sigma(iSource)^2 * obj.NReplications * NUninvolvedWit / obj.tbl.Sigma('Error')^2;
+                    thisFcrit = finv(1-alpha,obj.tbl.df(iSource),dfError);
+                    obj.tbl.Power(iSource) = 1 - fcdf(thisFcrit/Kappa,obj.tbl.df(iSource),dfError);
+                end
+            end
         end
         
         function InitSims(obj)
@@ -314,13 +328,13 @@ classdef AnovaPower < handle
             obj.NSims = obj.NSims + 1;
             obj.SimTrials.Y = obj.SimTrials.True + obj.SimTtlErr;
             [~, simtbl1] = CallAnovan(obj.SimTrials,'Y',obj.BetweenFacs,obj.WithinFacs,obj.SubjectSpec,'WantMu','NoDisplay');  % optionally pass a summary function here ???
-            simtbl = anovantbl2table(simtbl1);
-            for iSource=1:(height(simtbl)-1)
-                if simtbl.df(iSource)>0
-                    obj.tbl.obsTtlMS(iSource) = obj.tbl.obsTtlMS(iSource) + simtbl.MeanSq{iSource};
+            obj.simtbl = anovantbl2table(simtbl1,'FsForRandom');
+            for iSource=1:(height(obj.simtbl)-1)
+                if obj.simtbl.df(iSource)>0
+                    obj.tbl.obsTtlMS(iSource) = obj.tbl.obsTtlMS(iSource) + obj.simtbl.MeanSq{iSource};
                 end
                 try
-                    if simtbl.ProbF{iSource}<obj.alpha
+                    if obj.simtbl.ProbF{iSource}<obj.alpha
                         obj.tbl.obsSigp(iSource) = obj.tbl.obsSigp(iSource) + 1;
                     end
                 catch

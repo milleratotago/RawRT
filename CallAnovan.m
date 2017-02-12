@@ -27,7 +27,7 @@ NExptlFacs = NBetweenFacs + NWithinFacs;
 % Extract the optional arguments:
 [ThisFun, varargin] = ExtractNameVali('Function',0,varargin);  % e.g., @mean
 [NoDisplay,  varargin] = ExtractNamei({'NoDisplay','NoLoad'},varargin);
-[WantMean,  varargin] = ExtractNamei({'Mean','WantMean','WantMu','AddMean','Mu'},varargin);
+[WantMu,  varargin] = ExtractNamei({'Mean','WantMean','WantMu','AddMean','Mu'},varargin);
 
 % **************** Select the Included/Excluded data.
 % This must be done before checking factors, because the selected
@@ -131,8 +131,11 @@ end
      'model','full','random',NExptlFacs+1, NestArgs{:}, ... % 'nested',NestSpecs,
      'varnames',{BetweenFacs{:} WithinFacs{:} SubjectSpec},'display',sDisplay);
 
- if WantMean
+ if WantMu
      
+     % Increment the total df
+     tbl{end,3} = tbl{end,3} + 1;  % df
+
      % Insert a row to p and to tbl.
      p = [0; p];
      tbl = [tbl(1,:); tbl];
@@ -152,7 +155,8 @@ end
      
      % Compute Fmean & its p level:
      obsmean = stats.coeffs(1);
-     SS = obsmean^2;
+     SS = obsmean^2*tbl{end,3};  % mean^2 * total df
+
      dferr = tbl{ierrsrc,3};
      MSerr = tbl{ierrsrc,5};
      Fobs = SS / MSerr;
@@ -177,8 +181,6 @@ end
          tbl{2,15} = [];
      end
 
-     % Increment the total df
-     tbl{end,3} = tbl{end,3} + 1;  % df
 end
 
 end  % CallAnovan

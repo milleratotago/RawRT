@@ -1,5 +1,13 @@
-function [ outtbl, oldcolnames, oldrownames ] = anovantbl2table( tbl )
-% Convert an output table from "anovan" to a MATLAB table data type.
+function [ outtbl, oldcolnames, oldrownames ] = anovantbl2table( tbl, varargin )
+% Convert a table from the "anovan" output format to a MATLAB table data type.
+
+% Extract the optional arguments:  % NEWJEFF: MAYBE MAKE A SEPARATE FUNCTION FOR VARIOUS FIXES TO ANOVAN OUTPUT TBL
+[WantMu,  varargin] = ExtractNamei({'Mean','WantMean','WantMu','AddMean','Mu'},varargin);  % NEWJEFF: NOT PROCESSED YET.
+[FsForRandom,  varargin] = ExtractNamei({'FsForRandom'},varargin);
+
+% Halt if there are any unprocessed input arguments:
+assert(numel(varargin)==0,['Unprocessed arguments: ' strjoin(varargin)]);
+
 
 % newnames = matlab.lang.makeValidName(tbl(1,:),'ReplacementStyle','delete');
 % tbl(1,:) = newnames;
@@ -23,6 +31,20 @@ warning('on', MSGID)
 outtbl.Properties.VariableNames = newcolnames(2:end);
 
 outtbl.Properties.RowNames = newrownames(2:end);
+
+if FsForRandom
+    dfErr = outtbl.df('Error');
+    MSerr = outtbl.MeanSq{'Error'};
+    for iSource=1:height(outtbl)-2  % Skip total and error
+        if strcmp(outtbl.Type{iSource},'random')
+            outtbl.dfDenom{iSource} = dfErr;
+%            outtbl.ET = height(outtbl) - 2;
+%            outtbl.Fcrit
+            outtbl.F{iSource} = outtbl.MeanSq{iSource} / MSerr;
+            outtbl.ProbF{iSource} = 1 - fcdf(outtbl.F{iSource},outtbl.df(iSource),dfErr);
+        end
+    end
+end
 
 end
 
