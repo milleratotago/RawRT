@@ -79,24 +79,19 @@ else
     NCondsPerSub = 1;
 end
 
-% SubCondCombos determines the data to be written out for all subjects.
-SubCondCombos = [SubjectSpec WithinFacs];  % Subject factor assumed first
-
-% [NSubsTimesNConds, ~, ~, ~, ~, ~] = CondList(Trials,SubCondCombos);
-
-
-
-% **************** Compute the values of the DVs that are to be analyzed:
 
 if isa(ThisFun,'function_handle')
+    % Compute the summary values of the DVs that are to be analyzed:
+    % SubCondCombos determines the data to be written out for all subjects.
+    SubCondCombos = [SubjectSpec WithinFacs];  % Subject factor assumed first
     [MeansToUse, MeanDVNames] = CondFunsOfDVs(Trials,sDV,SubCondCombos,ThisFun);
 else
+    % Analyze the DVs in Trials, without summarizing them.
     MeansToUse = Trials;
 end
 OneIsMissing = ismissing(MeansToUse);
 NofNans = sum(OneIsMissing(1:end));
 assert(NofNans==0,['ANOVA aborted because ' num2str(NofNans) ' empty cell(s) found.']);
-
 
 % Call anovan
 if NoDisplay
@@ -129,7 +124,7 @@ end
 
 [p tbl stats] = anovan(Trials.(sDV),factorCodes, ...
      'model','full','random',NExptlFacs+1, NestArgs{:}, ... % 'nested',NestSpecs,
-     'varnames',{BetweenFacs{:} WithinFacs{:} SubjectSpec},'display',sDisplay);
+     'varnames',[BetweenFacs WithinFacs {SubjectSpec}],'display',sDisplay);
 
  if WantMu
      
@@ -172,7 +167,7 @@ end
      tbl{2,7} = 1 - fcdf(Fobs,1,dferr);
      if tblcols > 7
          tbl{2,8} = 'fixed';
-         tbl{2,9} = 'UNKNOWN';  % E[MS] NEWJEFF
+         tbl{2,9} = 'E[MS] UNKNOWN';
          tbl{2,10} = MSerr;
          tbl{2,11} = dferr;
          tbl{2,12} = ['MS(' ETName ')'];  % Denom defn
@@ -184,36 +179,4 @@ end
 end
 
 end  % CallAnovan
-
-
-function TrialsOut = RowsWhichSatisfy(Trials,Variables,Values)
-% Return the set of trials that have a certain pattern of variable values.
-% That is, return trials for which Trials.(Variables{i}) == Values(i) for all i
-% If no variables & values are specified, all rows are returned: e.g., RowsWhichSatisfy(Trials,{},[])
-%
-% Inputs:
-%    Trials: The starting trials table.
-%    Variables: A cell array indicating the names of the variables to be checked.
-%    Values: A vector of values that the corresponding variables must take on.
-%
-% Outputs:
-%    TrialsOut: A revised copy of the trials array with only trials satisfying the criteria.
-
-NChecks = numel(Values);  % Number of criteria used to exclude criteria.
-assert(NChecks == numel(Variables),'Must indicate the same number of variables and values.');
-
-TempVarName = UniqueVarname(Trials,'Asdf');
-
-Temp = Trials;
-Temp.(TempVarName) = ones(height(Trials),1);
-
-for iCrit=1:NChecks
-    sCrit = Variables{iCrit};    % Name of variable being checked.  It must have value   Values(iCrit)
-    Temp.(TempVarName)(~(Temp.(sCrit)==Values(iCrit))) = 0;  % Mark as bad any trials that do not have the desired value.
-end
-
-TrialsOut = Temp(Temp.(TempVarName)>0,:);
-TrialsOut.(TempVarName) = [];
-
-end
 

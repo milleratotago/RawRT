@@ -11,7 +11,7 @@ function tbl = Decompose(FacLevels, Means, varargin)
 
 NFactors = numel(FacLevels);
 NMeans = numel(Means);
-assert(NMeans==prod(FacLevels),'NEWJEFF');
+assert(NMeans==prod(FacLevels),'The number of means should equal the product of the numbers of factor levels.');
 
 % Generate a matrix to label the factorial combinations for all conditions, including Ss & blocks
 LevelLists = cell(NFactors,1);
@@ -38,7 +38,7 @@ tbl{2,2} = NMeans * mean(Means(1:end))^2;  % SS
 tbl{2,3} = 1;  % df
 tbl{2,4} = 0;
 tbl{2,5} = tbl{2,2};  % MS
-[rows,cols] = size(tbl);
+[~,cols] = size(tbl);
 for iCol=6:cols
     tbl{2,iCol} = [];
 end

@@ -1,8 +1,8 @@
 function [ outtbl, oldcolnames, oldrownames ] = anovantbl2table( tbl, varargin )
 % Convert a table from the "anovan" output format to a MATLAB table data type.
 
-% Extract the optional arguments:  % NEWJEFF: MAYBE MAKE A SEPARATE FUNCTION FOR VARIOUS FIXES TO ANOVAN OUTPUT TBL
-[WantMu,  varargin] = ExtractNamei({'Mean','WantMean','WantMu','AddMean','Mu'},varargin);  % NEWJEFF: NOT PROCESSED YET.
+% Extract the optional argument requesting that F's be computed to test whether
+% random components are large relative to the pure "Error" term. 
 [FsForRandom,  varargin] = ExtractNamei({'FsForRandom'},varargin);
 
 % Halt if there are any unprocessed input arguments:

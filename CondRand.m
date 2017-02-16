@@ -3,6 +3,9 @@ function outDV = CondRand(inTrials,CondSpecs,RV,varargin)
 % and return the result as the output DV.
 % This function can be used to build up simulated scores for ANOVA; you must
 % call it once for each component going into the score.
+%
+% If the optional parameter AutoCenter is specified, the function CondCenter
+% is called to make the mean zero with the remaining arguments.
 
 [AutoCenter, varargin] = ExtractNamei('AutoCenter',varargin);
 

@@ -102,7 +102,7 @@ classdef AnovaPower < handle
             
             % Create a fake DV & analyze it with anovan to determine the ANOVA table structure.
             sDV = UniqueVarname(dummyTrials,'DV');
-            dummyTrials.(sDV) = zeros(height(dummyTrials),1);
+            dummyTrials.(sDV) = rand(height(dummyTrials),1);
             [~, tbl1, ~] = CallAnovan(dummyTrials,sDV,obj.BetweenFacs,obj.WithinFacs,obj.SubjectSpec,'WantMu','NoDisplay');
             obj.tbl = anovantbl2table(tbl1);
             obj.NSources = height(obj.tbl);
@@ -120,11 +120,21 @@ classdef AnovaPower < handle
         
         function setETs(obj)
             obj.tbl.ET = NaN(height(obj.tbl),1);
+            SubjectSpecNested = obj.SubjectSpec;
+            for iSource=1:obj.NBetweenFacs
+                SubjectSpecNested = [SubjectSpecNested obj.BetweenFacs{iSource}];
+            end
             for iSource = 1:obj.NSources
-                sDenomName = obj.tbl.DenomDefn{iSource};
-                if numel(sDenomName)>0
-                    sDenomName = matlab.lang.makeValidName(sDenomName,'ReplacementStyle','delete');
-                    sDenomName = sDenomName(3:end);  % Omit initial MS
+                if strcmp(obj.tbl.Type{iSource},'random')
+                    obj.tbl.ET(iSource) = height(obj.tbl)-1;
+                else
+                    % fixed sources 
+                    if iSource>1
+                        sDenomName = obj.FindWithinComponents(obj.tbl.Properties.RowNames{iSource});
+                        sDenomName = [sDenomName{:} SubjectSpecNested];
+                    else
+                        sDenomName = SubjectSpecNested;  % Error term for Mu
+                    end
                     thisRow = find(strcmp(sDenomName,obj.tbl.Properties.RowNames));
                     if numel(thisRow)==1
                         obj.tbl.ET(iSource) = thisRow;
@@ -211,7 +221,7 @@ classdef AnovaPower < handle
         function setOmegaSqrs(obj)
             % omega^2 = sigma^2(AB)/(sigma^2(AB)+sigma^2(ABS)+sigma^2(error)/NReplications)
             % tbl.ThetaSqr & tbl.Sigma must already exist
-            % NEWJEFF: NOT SURE HOW OmegaSqr is defined when TrialVariance>0.
+            % NEWJEFF: NOT SURE HOW OmegaSqr is defined when TrialVariance>0.  See DoddSchultz1973, OlejnikAlgina2003
             obj.tbl.OmegaSqr = NaN(obj.NSources,1);
             obj.tbl.OmegaSqr(obj.FixedSources) = obj.tbl.ThetaSqr(obj.FixedSources) ./ ...
                 ( obj.tbl.ThetaSqr(obj.FixedSources) ...
@@ -227,7 +237,7 @@ classdef AnovaPower < handle
         end
         
         function setPowers(obj,TrueMeans,TrueSigmas,alpha)
-            obj.setFcrits(alpha);
+            obj.setFcrits(alpha);  % NEWJEFF: Move these calls to main routine where setPowers is called.
             obj.setSigmas(TrueSigmas);
             obj.setThetaSqrs(TrueMeans);
             obj.setNoncentralities;
@@ -276,23 +286,26 @@ classdef AnovaPower < handle
                 iSource = obj.RandomSources(jSource);
                 if obj.tbl.Sigma(iSource)>0
                     obj.RVerr{iSource} = Normal(0,obj.tbl.Sigma(iSource));
-                    obj.ErrConstraints{iSource} = obj.FindWithinErrorComponents(iSource);
+                else
+                    obj.RVerr{iSource} = ConstantC(0);
                 end
+                obj.ErrConstraints{iSource} = obj.FindWithinComponents(iSource);
                 obj.ErrSrcName{iSource} = UniqueVarname(obj.SimTrials,[obj.tbl.Properties.RowNames{iSource} 'err']);
                 obj.SrcWithSub(iSource) = numel(strfind(obj.tbl.Properties.RowNames{iSource},obj.SubjectSpec))>0;
             end % for jSource
         end
         
-        function theseSources = FindWithinErrorComponents(obj,thisSource)
-            % Return a cell array with the names of the within-sources that precede S in thisSourceName.
+        function theseSources = FindWithinComponents(obj,thisSource)
+            % Return a cell array with the names of the within-subject components in thisSourceName.
             theseSources = {};
             thisSourceName = obj.tbl.Properties.RowNames{thisSource};  % Get the source name, e.g. AS(B)
             % Delete everything from the subject spec onward
             iPos = strfind(thisSourceName,obj.SubjectSpec);
             if (numel(iPos)==0) || (iPos(1)<2)
-                return
+                WithinComponents = thisSourceName;
+            else
+                WithinComponents = thisSourceName(1:iPos-1);  % Whatever precedes the S, e.g. A
             end
-            WithinComponents = thisSourceName(1:iPos-1);  % Whatever precedes the S, e.g. A
             for iFac=1:obj.NWithinFacs
                 iPos = strfind(WithinComponents,obj.WithinFacs{iFac});
                 if numel(iPos)>0
@@ -347,8 +360,8 @@ classdef AnovaPower < handle
             % NewJeff: add an option to print to a file
             % NewJeff: add an option to report only fixed lines
             Conf = .99;  % Confidence intervals for p use this confidence level
-            ColHdr = {'Source', 'df', 'Fcrit', 'ThetaSqr', 'Noncen', 'OmegaSqr', 'CohenfSqr', 'Power' , 'obsEMS', 'ObsPrSig', 'LoBnd', 'UpBnd'};
-            ColWid = {    '12',  '5',     '7',       '14',     '14',       '10',        '11',     '8' ,     '12',       '10',     '8',     '8'};
+            ColHdr = {'Source', 'df', 'Fcrit', 'ThetaSqr', 'Noncen', 'OmegaSqr', 'CohenfSqr', 'Power' , 'ObsPrSig', 'LoBnd', 'UpBnd', 'obsEMS'};
+            ColWid = {    '12',  '5',     '7',       '14',     '14',       '10',        '11',     '8' ,       '10',     '8',     '8',     '15'};
             ReportSims = obj.NSims > 0;
             if ReportSims
                 sSimTxt = [' with ' num2str(obj.NSims) ' simulations'];
@@ -358,7 +371,6 @@ classdef AnovaPower < handle
                 NColsToUse = 8;
             end
             fprintf('Power report%s:\n',sSimTxt);
-            %             fprintf('               Source   df   Fcrit     E[MS]   Theta^2   Noncen.   Omega^2   Cohen-f^2    Power   Obs Pr(Sig)   LowerBnd   UpperBnd\n');
             for iCol = 1:NColsToUse
                 fprintf(['%' ColWid{iCol} 's'],ColHdr{iCol});
             end
@@ -375,9 +387,6 @@ classdef AnovaPower < handle
                 iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.CohenfSqr(iSource));
                 iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.Power(iSource));
                 if ReportSims
-                    iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.obsTtlMS(iSource)/obj.NSims);
-                end
-                if ReportSims && (~isnan(obj.tbl.Power(iSource)))
                     pPred = obj.tbl.Power(iSource);
                     pObs = obj.tbl.obsSigp(iSource)/obj.NSims;
                     LBnd = binoinv((1-Conf)/2,obj.NSims,pPred)/obj.NSims;
@@ -390,6 +399,7 @@ classdef AnovaPower < handle
                     iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f%c'],pObs,Flag);
                     iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],LBnd);
                     iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],UBnd);
+                    iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.obsTtlMS(iSource)/obj.NSims);
                 end
                 fprintf('\n');
             end
