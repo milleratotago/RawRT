@@ -306,5 +306,5 @@ end
 TrialsOut = Temp(Temp.(TempVarName)>0,:);
 TrialsOut.(TempVarName) = [];
 
-end
+end  % RowsWhichSatisfy
 

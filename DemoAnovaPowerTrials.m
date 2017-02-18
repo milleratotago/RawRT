@@ -1,7 +1,7 @@
 %% Parameters used in all examples.
 
 alpha = .05;
-NSims = 100;
+NSims = 500;
 
 % For a situation with only 1 measurement per subject per condition,
 % use these three lines:
@@ -18,6 +18,12 @@ TrialError = 50;  % Standard deviation associated with random error from one mea
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
 %  ************************************
+
+% % NWJEFF: TESTING
+% alpha = .05;
+% NSims = 5;
+% NTrials = 2;
+% TrialError = 10;
 
 BetweenFacs = {};
 BetweenLevels = [];
@@ -43,7 +49,7 @@ TrueSigmas = [...  % MUST MATCH ORDER OF RANDOM SOURCES IN TABLE PRODUCED BY ANO
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
@@ -95,7 +101,7 @@ TrueSigmas = [...  % MUST MATCH ORDER OF RANDOM SOURCES IN TABLE PRODUCED BY ANO
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
@@ -111,17 +117,15 @@ mintoc
 
 %% 3-Within Factors Example.
 
-% NEWJEFF: This one gives wrong power for A and is not well tested for AS, BS, etc due to too high power.
-
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
 %  ************************************
 
 % Testing
 alpha = .05;
-NTrials = 5;
 NSims = 100;
-TrialError = 22;
+NTrials = 20;  % 5/22 was OK
+TrialError = 50;
 
 BetweenFacs = {};
 BetweenLevels = [];
@@ -154,7 +158,7 @@ TrueSigmas = [...  % MUST MATCH ORDER OF RANDOM SOURCES IN TABLE PRODUCED BY ANO
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
@@ -163,10 +167,10 @@ anvpwr.InitSims;
 tic
 for iSim=1:NSims
     anvpwr.SimulateOne;
-    if ~(anvpwr.simtbl.dfDenom{2}==5)
-        disp('Error found');
-        return;
-    end
+%     if ~(anvpwr.simtbl.dfDenom{2}==5)
+%         disp('Error found');
+%         return;
+%     end
 end
 anvpwr.Report;
 mintoc
@@ -200,7 +204,7 @@ TrueSigmas = [32 TrialError];  % SABC, Error
 %            ,[BetweenLevels NSubsPerGroup WithinLevels],'Between',{BetweenFacs,SubName});
 % anvpwr = AnovaPower(Trials,BetweenFacs,WithinFacs,SubName,ReplicParms{:});
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
@@ -244,7 +248,7 @@ TrueSigmas = [32 TrialError];  % SABC, Error
 %            ,[BetweenLevels NSubsPerGroup WithinLevels],'Between',{BetweenFacs,SubName});
 % anvpwr = AnovaPower(Trials,BetweenFacs,WithinFacs,SubName,ReplicParms{:});
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
@@ -296,7 +300,7 @@ TrueSigmas = [sigmaSABC tempTrialError];  % SABC, Error
 %            ,[BetweenLevels NSubsPerGroup WithinLevels],'Between',{BetweenFacs,SubName});
 % anvpwr = AnovaPower(Trials,BetweenFacs,WithinFacs,SubName,ReplicParms{:});
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
@@ -341,7 +345,7 @@ TrueSigmas = [54 24 TrialError];  % SA, BSA, Error
 %            ,[BetweenLevels NSubsPerGroup WithinLevels],'Between',{BetweenFacs,SubName});
 % anvpwr = AnovaPower(Trials,BetweenFacs,WithinFacs,SubName,ReplicParms{:});
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
@@ -356,9 +360,6 @@ anvpwr.Report;
 mintoc
 
 %% 3-Mixed Example, 2 Within
-
-% NEWJEFF: Wrong power for B, 1st of 2 within-Ss factors following a between-Ss factor.
-% NEWJEFF: This worked with 2-letter factor names!!!
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -390,7 +391,7 @@ TrueSigmas = [54 24 22 12 TrialError];  % SA, BSA, CSA, BCSA, Error
 %            ,[BetweenLevels NSubsPerGroup WithinLevels],'Between',{BetweenFacs,SubName});
 % anvpwr = AnovaPower(Trials,BetweenFacs,WithinFacs,SubName,ReplicParms{:});
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
@@ -437,7 +438,7 @@ TrueSigmas = [54 24 TrialError];  % SAC, BSAC, Error
 %            ,[BetweenLevels NSubsPerGroup WithinLevels],'Between',{BetweenFacs,SubName});
 % anvpwr = AnovaPower(Trials,BetweenFacs,WithinFacs,SubName,ReplicParms{:});
 
-anvpwr = AnovaPowerSetup(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 
 anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
