@@ -12,6 +12,7 @@ function [p, tbl, stats] = CallAnovan(Trials,sDV,BetweenFacs,WithinFacs,SubjectS
 %   'Function',function_handle: A function handle indicating what function to compute, if not the mean.
 %                               Limitation: The function can only return one output value.
 %   'NoDisplay': Tell MATLAB not to display the anovan output.
+%   'WantMu' : Augment the anovan output tbl by adding a line for the constant term in the model.
 
 % Outputs p, tbl, and stats are produced by anovan.
 
@@ -41,7 +42,7 @@ assert(numel(varargin)==0,['Unprocessed arguments: ' strjoin(varargin)]);
 % **************** Process between-Ss factor(s) & Subjects factor:
 
 if NBetweenFacs > 0
-    [NGroups, ~, BetweenLevels, ~, ~, GroupSpecIndices] = CondList(Trials,BetweenFacs);
+    [NGroups, ~, ~, ~, ~, GroupSpecIndices] = CondList(Trials,BetweenFacs);
 else
     NGroups = 1;
 end
@@ -73,23 +74,24 @@ end
 
 % **************** Process within-Ss factor(s):
 
-if NWithinFacs > 0
-    [NCondsPerSub, ~, WithinLevels, ~, ~, ~] = CondList(Trials,WithinFacs);
-else
-    NCondsPerSub = 1;
-end
+% if NWithinFacs > 0
+%     [NCondsPerSub, ~, WithinLevels, ~, ~, ~] = CondList(Trials,WithinFacs);
+% else
+%     NCondsPerSub = 1;
+% end
 
 
 if isa(ThisFun,'function_handle')
     % Compute the summary values of the DVs that are to be analyzed:
     % SubCondCombos determines the data to be written out for all subjects.
-    SubCondCombos = [SubjectSpec WithinFacs];  % Subject factor assumed first
-    [MeansToUse, MeanDVNames] = CondFunsOfDVs(Trials,sDV,SubCondCombos,ThisFun);
+    SubCondCombos = [SubjectSpec BetweenFacs WithinFacs];  % Subject factor assumed first
+    [ValsToUse, MeanDVNames] = CondFunsOfDVs(Trials,sDV,SubCondCombos,ThisFun);
+    sDV = MeanDVNames{1};
 else
     % Analyze the DVs in Trials, without summarizing them.
-    MeansToUse = Trials;
+    ValsToUse = Trials;
 end
-OneIsMissing = ismissing(MeansToUse);
+OneIsMissing = ismissing(ValsToUse);
 NofNans = sum(OneIsMissing(1:end));
 assert(NofNans==0,['ANOVA aborted because ' num2str(NofNans) ' empty cell(s) found.']);
 
@@ -101,12 +103,12 @@ else
 end
 factorCodes = cell(1,NExptlFacs+1);
 for iFac=1:NBetweenFacs
-    factorCodes{1,iFac} = Trials.(BetweenFacs{iFac});
+    factorCodes{1,iFac} = ValsToUse.(BetweenFacs{iFac});
 end
 for iFac=1:NWithinFacs
-    factorCodes{1,NBetweenFacs+iFac} = Trials.(WithinFacs{iFac});
+    factorCodes{1,NBetweenFacs+iFac} = ValsToUse.(WithinFacs{iFac});
 end
-factorCodes{1,end} = Trials.(SubjectSpec);
+factorCodes{1,end} = ValsToUse.(SubjectSpec);
 
 % Define nesting if any between-Ss factors:
 if NBetweenFacs>0
@@ -122,7 +124,7 @@ else
    NestArgs = {};
 end
 
-[p tbl stats] = anovan(Trials.(sDV),factorCodes, ...
+[p tbl stats] = anovan(ValsToUse.(sDV),factorCodes, ...
      'model','full','random',NExptlFacs+1, NestArgs{:}, ... % 'nested',NestSpecs,
      'varnames',[BetweenFacs WithinFacs {SubjectSpec}],'display',sDisplay);
 

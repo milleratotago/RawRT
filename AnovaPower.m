@@ -1,5 +1,5 @@
-classdef AnovaPower < handle  % New version using anovan only for SS
-    % Class to perform power-related computations with Anova tables
+classdef AnovaPower < handle
+    % Class to perform power-related computations for some Anova designs.
     % Can also be used to generate & tabulate simulation results.
     
     properties
@@ -69,6 +69,10 @@ classdef AnovaPower < handle  % New version using anovan only for SS
         end
         
         function irow = FindAnovanRow(anovantbl,sLabel)
+            % Return the row number in the anovan table that corresponds to the
+            % row called sLabel.  This function depends on both the row names
+            % in column 1 of anovan's output tbl's and those set by AnovaStructure.
+            % At present, I assume they are the same.
             irow = find(strcmp(anovantbl(:,1),sLabel));
         end
         
@@ -125,10 +129,6 @@ classdef AnovaPower < handle  % New version using anovan only for SS
             obj.FullSubName = obj.tbl.Properties.RowNames{iSubTerm};
         end
         
-        function iRow = RowNameToNum(obj,sName)
-            iRow = find(strcmp(sName,obj.tbl.RowNames));
-        end
-        
         function setFcrits(obj,passalpha)
             obj.alpha = passalpha;
             obj.tbl.Fcrit = nan(obj.NSources,1);
@@ -143,7 +143,8 @@ classdef AnovaPower < handle  % New version using anovan only for SS
         function setSigmas(obj,SigmaList)
             % This routine just stores the designated error terms (specified in SigmaList)
             % in the corresponding rows of tbl.Sigma.
-            % Note that the order in SigmaList MUST MATCH the row order in tbl.  NEWJEFF: WHICH IS NOT THE SAME AS anovan
+            % Note that the order in SigmaList MUST MATCH the row order in the ANOVA table
+            % stored in tbl (this is _not_ the same as the row order in anovan's output tbl).
             obj.tbl.Sigma = nan(obj.NSources,1);
             nUsed = 0;
             for iSource = 1:obj.NSources
@@ -155,7 +156,8 @@ classdef AnovaPower < handle  % New version using anovan only for SS
                     obj.tbl.Sigma(iSource) = SigmaList(nUsed);
                 end
             end
-            if nUsed < numel(SigmaList)
+            if nUsed < numel(SigmaList) && ...
+               ( (nUsed+1 < numel(SigmaList)) || (SigmaList(end)>0) )
                 warning(['Ignored last ' num2str(numel(SigmaList)-nUsed) ' values in SigmaList.']);
             end
         end
@@ -170,13 +172,11 @@ classdef AnovaPower < handle  % New version using anovan only for SS
             % obtained here by the number of df's or conditions in the source.
             obj.TrueMeans = passTrueMeans;
             dummytbl = Decompose(obj.ExptlLevels, obj.TrueMeans, obj.ExptlNames);
-%             dummytbl = anovantbl2table(dummytbl1, obj.BetweenNames, obj.WithinNames, obj.SubName);
             % Note that the SumSq terms in this table do increase when there are additional
             % factors in the design, since the SumSq is totalled across rows of the decomp
             % matrix (and there are more rows when there are more factors).
             % To obtain the desired ThetaSqr, each SumSq must be divided by the number
             % of levels of each of the factors _not_ involved in this source.
-            % obj.tbl = obj.AddAnovanCols(obj.tbl,dummytbl);  % Just want to add experimental SS's here, not dfs & not error terms
             obj.tbl.SS = zeros(obj.NSources,1);
             for iSource=1:obj.NSources
                 myRowInAnovan = obj.FindAnovanRow(dummytbl,obj.tbl.Properties.RowNames{iSource});
@@ -198,8 +198,11 @@ classdef AnovaPower < handle  % New version using anovan only for SS
         function setNoncentralities(obj)
             % ThetaSqr & Sigma terms must already exist.
             obj.tbl.Noncentrality = NaN(obj.NSources,1);
-            obj.TrialVariance = obj.tbl.Sigma('Error')^2/obj.NReplications;
-            newjefftblhere = obj.tbl
+            if obj.NReplications>1
+                obj.TrialVariance = obj.tbl.Sigma('Error')^2/obj.NReplications;
+            else
+                obj.TrialVariance = 0;
+            end
             for jSource = 1:numel(obj.FixedSources)
                 iSource = obj.FixedSources(jSource);
                 % In general, noncen = N * thetasqr / sigma^2 where N is the number of Ss at
@@ -219,12 +222,14 @@ classdef AnovaPower < handle  % New version using anovan only for SS
         function setOmegaSqrs(obj)
             % omega^2 = sigma^2(AB)/(sigma^2(AB)+sigma^2(ABS)+sigma^2(error)/NReplications)
             % tbl.ThetaSqr & tbl.Sigma must already exist
-            % NEWJEFF: NOT SURE HOW OmegaSqr is defined when TrialVariance>0.  See DoddSchultz1973, OlejnikAlgina2003
             obj.tbl.OmegaSqr = NaN(obj.NSources,1);
-            obj.tbl.OmegaSqr(obj.FixedSources) = obj.tbl.ThetaSqr(obj.FixedSources) ./ ...
-                ( obj.tbl.ThetaSqr(obj.FixedSources) ...
-                + obj.tbl.Sigma(obj.tbl.ET(obj.FixedSources)).^2 ...
-                + obj.TrialVariance );
+            if obj.TrialVariance==0
+                % I AM NOT SURE HOW OmegaSqr is defined when TrialVariance>0 !!  See DoddSchultz1973, OlejnikAlgina2003.
+                obj.tbl.OmegaSqr(obj.FixedSources) = obj.tbl.ThetaSqr(obj.FixedSources) ./ ...
+                    ( obj.tbl.ThetaSqr(obj.FixedSources) ...
+                    + obj.tbl.Sigma(obj.tbl.ET(obj.FixedSources)).^2 );
+                    % ??? + obj.TrialVariance/SomeUnknownN );
+            end
         end
         
         function setCohenfSqrs(obj)
@@ -235,7 +240,7 @@ classdef AnovaPower < handle  % New version using anovan only for SS
         end
         
         function setPowers(obj,TrueMeans,TrueSigmas,alpha)
-            obj.setFcrits(alpha);  % NEWJEFF: Move these calls to main routine where setPowers is called.
+            obj.setFcrits(alpha);
             obj.setSigmas(TrueSigmas);
             obj.setThetaSqrs(TrueMeans);
             obj.setNoncentralities;
@@ -293,6 +298,8 @@ classdef AnovaPower < handle  % New version using anovan only for SS
                 obj.SrcWithSub(iSource) = numel(strfind(obj.tbl.Properties.RowNames{iSource},obj.SubName))>0;
             end % for jSource
             obj.simtbl = obj.tbl;
+            obj.simtbl.F = nan(obj.NSources,1);
+            obj.simtbl.ProbF = nan(obj.NSources,1);
         end
         
         function theseSources = FindWithinComponents(obj,thisSource)
@@ -341,9 +348,7 @@ classdef AnovaPower < handle  % New version using anovan only for SS
             obj.NSims = obj.NSims + 1;
             obj.SimTrials.Y = obj.SimTrials.True + obj.SimTtlErr;
             [~, obj.simtbl1] = CallAnovan(obj.SimTrials,'Y',obj.BetweenNames,obj.WithinNames,obj.SubName,'WantMu','NoDisplay');  % optionally pass a summary function here ???
-            % obj.simtbl = obj.AddAnovanCols(obj.simtbl,obj.simtbl1);
-            % anovantbl2table(obj.simtbl1, obj.BetweenNames, obj.WithinNames, obj.SubName,'FsForFixed','FsForRandom');
-            % NEWJEFF: Store the row numbers so I don't have to retrieve them each simulation
+            % Improve here: Store the row numbers so I don't have to retrieve them each simulation.
             for iSource=1:obj.NSources
                 myRowInAnovan = obj.FindAnovanRow(obj.simtbl1,obj.tbl.Properties.RowNames{iSource});
                 if numel(myRowInAnovan)>0
@@ -352,8 +357,6 @@ classdef AnovaPower < handle  % New version using anovan only for SS
                 end
             end
             obj.simtbl.MeanSq = obj.simtbl.SS ./ obj.simtbl.df;
-            obj.simtbl.F = zeros(obj.NSources,1);  % NEWJEFF: InitSims next 2
-            obj.simtbl.ProbF = zeros(obj.NSources,1);
             obj.simtbl.F(obj.SourcesWithFs) = obj.simtbl.MeanSq(obj.SourcesWithFs) ./ obj.simtbl.MeanSq(obj.simtbl.ETnum(obj.SourcesWithFs));
             obj.simtbl.ProbF(obj.SourcesWithFs) = 1 - fcdf(obj.simtbl.F(obj.SourcesWithFs),obj.simtbl.df(obj.SourcesWithFs),obj.simtbl.df(obj.simtbl.ETnum(obj.SourcesWithFs)));
             for iSource=1:height(obj.simtbl)
@@ -370,52 +373,79 @@ classdef AnovaPower < handle  % New version using anovan only for SS
             end % for iSource
         end
         
+        function ReportTrueMeans(obj)
+            % Generate matrix of factorial combinations for all conditions, including Ss & blocks
+            LevelLists = cell(obj.NExptl,1);
+            for iFac=1:obj.NExptl
+                LevelLists{iFac} = 1:obj.ExptlLevels(iFac);
+            end
+            AllCombos = allcomb(LevelLists{:});   % This has all combinations of factor combinations.
+            CellMeans = array2table(AllCombos,'VariableNames',obj.ExptlNames);
+            CellMeans.TrueMean = obj.TrueMeans';
+            CellMeans  % Write it out
+        end
+        
         function Report(obj)
-            % NewJeff: add an option to print to a file
-            % NewJeff: add an option to report only fixed lines
             Conf = .99;  % Confidence intervals for p use this confidence level
-            ColHdr = {'Source', 'df', 'Fcrit', 'ThetaSqr', 'Noncen', 'OmegaSqr', 'CohenfSqr', 'Power' , 'ObsPrSig', '99%LoBnd', '99%UpBnd', 'obsEMS'};
-            ColWid = {    '12',  '5',     '7',       '14',     '14',       '10',        '11',     '8' ,       '10',     '10',     '10',     '15'};
+            ColHdr = {'Source', 'df', 'Sigma',   'Fcrit', 'ThetaSqr', 'Noncen', 'OmegaSqr', 'CohenfSqr', 'Power' , 'ObsPrSig', '99%LoBnd', '99%UpBnd', 'Avg[MS]'};
+            sColWid = {    '12',  '5',    '9',       '7',       '14',     '14',       '10',        '11',     '8' ,       '10',     '10',     '10',     '15'};
+            ColWidn = cellfun(@str2num,sColWid);
+            FlagWid = 1;  % Doesn't work to increase because flag is written with %c
             ReportSims = obj.NSims > 0;
             if ReportSims
                 sSimTxt = [' with ' num2str(obj.NSims) ' simulations'];
                 NColsToUse = numel(ColHdr);
             else
                 sSimTxt = '';
-                NColsToUse = 8;
+                NColsToUse = find(strcmp(ColHdr,'Power'));
             end
-            fprintf('Power report%s:\n',sSimTxt);
+            fprintf('**** AnovaPower report%s ****:\n',sSimTxt);
             LevelsList('Between',obj.BetweenNames,obj.BetweenLevels);
             LevelsList('Within',obj.WithinNames,obj.WithinLevels);
+            obj.ReportTrueMeans;
             for iCol = 1:NColsToUse
-                fprintf(['%' ColWid{iCol} 's'],ColHdr{iCol});
+                fprintf(['%' sColWid{iCol} 's'],ColHdr{iCol});
             end
             fprintf('\n');
-            % padSrc = obj.tbl.Properties.RowNames; % pad(obj.tbl.Properties.RowNames);  NEWJEFF: Coming in R2016b
             for iSource = 1:height(obj.tbl)
                 iCol = 0;
-                iCol = iCol+1;  fprintf(['%' ColWid{iCol} 's'  ],obj.tbl.Properties.RowNames{iSource});
-                iCol = iCol+1;  fprintf(['%' ColWid{iCol} 'd'  ],obj.tbl.df(iSource));
-                iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.Fcrit(iSource));
-                iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.ThetaSqr(iSource));
-                iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.Noncentrality(iSource));
-                iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.OmegaSqr(iSource));
-                iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.CohenfSqr(iSource));
-                iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.Power(iSource));
+                iCol = iCol+1;  fprintf(['%' sColWid{iCol} 's'  ],obj.tbl.Properties.RowNames{iSource});
+                iCol = iCol+1;  fprintf(['%' sColWid{iCol} 'd'  ],obj.tbl.df(iSource));
+                if isnan(obj.tbl.Sigma(iSource))
+                    iCol = iCol + 1;  fprintf('%s',blanks(ColWidn(iCol)));
+                else
+                    iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],obj.tbl.Sigma(iSource));
+                end
+                if isnan(obj.tbl.Fcrit(iSource))
+                    fprintf('%s',blanks(sum(ColWidn(iCol+1:iCol+6))));
+                    iCol = iCol + 6;
+                else
+                    iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],obj.tbl.Fcrit(iSource));
+                    iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],obj.tbl.ThetaSqr(iSource));
+                    iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],obj.tbl.Noncentrality(iSource));
+                    iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],obj.tbl.OmegaSqr(iSource));
+                    iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],obj.tbl.CohenfSqr(iSource));
+                    iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],obj.tbl.Power(iSource));
+                end
                 if ReportSims
-                    pPred = obj.tbl.Power(iSource);
-                    pObs = obj.tbl.obsSigp(iSource)/obj.NSims;
-                    LBnd = binoinv((1-Conf)/2,obj.NSims,pPred)/obj.NSims;
-                    UBnd = binoinv(Conf+(1-Conf)/2,obj.NSims,pPred)/obj.NSims;
-                    if (pObs<LBnd) || (pObs>UBnd)
-                        Flag = '*';
+                    if isnan(obj.tbl.Fcrit(iSource))
+                        fprintf('%s',blanks(sum(ColWidn(iCol+1:iCol+3))+FlagWid));
+                        iCol = iCol + 3;
                     else
-                        Flag = ' ';
+                        pPred = obj.tbl.Power(iSource);
+                        pObs = obj.tbl.obsSigp(iSource)/obj.NSims;
+                        LBnd = binoinv((1-Conf)/2,obj.NSims,pPred)/obj.NSims;
+                        UBnd = binoinv(Conf+(1-Conf)/2,obj.NSims,pPred)/obj.NSims;
+                        if (pObs<LBnd) || (pObs>UBnd)
+                            Flag = '!';
+                        else
+                            Flag = blanks(FlagWid);
+                        end
+                        iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f%c'],pObs,Flag);
+                        iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],LBnd);
+                        iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],UBnd);
                     end
-                    iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f%c'],pObs,Flag);
-                    iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],LBnd);
-                    iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],UBnd);
-                    iCol = iCol+1;  fprintf(['%' ColWid{iCol} '.3f'],obj.tbl.obsTtlMS(iSource)/obj.NSims);
+                    iCol = iCol+1;  fprintf(['%' sColWid{iCol} '.3f'],obj.tbl.obsTtlMS(iSource)/obj.NSims);
                 end
                 fprintf('\n');
             end
