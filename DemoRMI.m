@@ -37,12 +37,12 @@ SOA = 50;
 ttestTable = RMIttests(RMITable, DVList,'Red',Prctiles)
 
 
-
 %% ANOVA Analysis of Race Model Inequality (RMI)
 % This section also tests the RMI at each percentile point, but now using ANOVA
 % instead of t-tests.  It gives the same results as the t-test (i.e., same p values)
 % if there is only the redundant/sum-single factor. But the ANOVA could also be used
 % with an additional factor (e.g., practice level, subject group, etc).
+% NewJeff: Elaborate this example to actually include an additional factor.
 
 SOA = 50;
 
@@ -68,4 +68,22 @@ Err3 = Vincentized.RTprctiles(Vincentized.Red==3,1:end) - table2array(RMIMeans(R
 disp('The root mean square difference between the estimates is:');
 sqrt((sum(Err1.^2)+sum(Err2.^2)+sum(Err3.^2))/3/numel(Prctiles))
 
+
+%% Plot the difference between the redundant and sum-single curves based on spline-approximations
+% of both curves over the RT range where the two curves overlap.
+
+% find the range of t's where the curves overlap:
+tMin = max(RedMns(1),SumSingleMns(1));
+tMin = ceil(tMin);
+tMax = min(RedMns(end),SumSingleMns(end));
+tMax = floor(tMax);
+t = tMin:tMax;  % The list of time points at which CDF differences will be computed.
+
+SplineRedCDF = spline(RedMns,Prctiles,t);  % The CDF values of the redundant curve at the indicated t values
+SplineSumSglCDF = spline(SumSingleMns,Prctiles,t);  % The CDF values of the sum-single curve at the indicated t values
+ViolCDF = SplineRedCDF - SplineSumSglCDF;  % These are the differences in CDFs between the two curves at each value of t
+figure
+plot(t,ViolCDF);
+xlabel('RT');
+ylabel('RMI Violation %');
 
