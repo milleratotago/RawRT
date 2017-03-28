@@ -86,7 +86,8 @@ function A = allcomb(varargin)
 % 3.0 (may 2012) removed check for doubles so character arrays are accepted
 % 4.0 (feb 2014) added support for cell arrays
 
-error(nargchk(1,Inf,nargin)) ;
+% error(nargchk(1,Inf,nargin)) ;  % Before MATLAB 2016b
+narginchk(1,Inf);  % After MATLAB 2016b
 
 NC = nargin ;
 
