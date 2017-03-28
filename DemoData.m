@@ -247,7 +247,7 @@ NTrials = height(Trials);
 RTmn = 500;
 RTsd =  50;
 
-RTRedEff = 100;        % Increase to make a bigger RT difference between redundant and single.
+RTRedEff = 40;        % Increase to make a bigger RT difference between redundant and single.
 
 Trials.RT = randn(NTrials,1)*RTsd + RTmn;
 Trials.RT(Trials.Red==3) = Trials.RT(Trials.Red==3) - RTRedEff;

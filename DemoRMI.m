@@ -42,48 +42,42 @@ ttestTable = RMIttests(RMITable, DVList,'Red',Prctiles)
 % instead of t-tests.  It gives the same results as the t-test (i.e., same p values)
 % if there is only the redundant/sum-single factor. But the ANOVA could also be used
 % with an additional factor (e.g., practice level, subject group, etc).
-% NewJeff: Elaborate this example to actually include an additional factor.
+% For this demo, the RMI is computed separately for the 1st/2nd half of the blocks.
+
+Trials.Half = floor((Trials.Blk+1)/2);  % Divide expt into 1st/2nd half to make another factor.
 
 SOA = 50;
 
-[RMITable, DVList] = CondRMItable(Trials,'RT','Red','SubNo',Prctiles,SOA);
+[RMITable, DVList] = CondRMItable(Trials,'RT','Red',{'SubNo','Half'},Prctiles,SOA);
 
-CallMrf(RMITable,DVList,{},{'Red'},'SubNo','RMITest1','Include',RMITable.Red>2);  % Include only condition numbers 3 & 4 (Redundant and SumSingle)
-
-RMIMeans = CondMeans(RMITable,DVList,'Red');
-NPcts = numel(Prctiles);
-Single1Mns=table2array(RMIMeans(RMIMeans.Red==1,end-NPcts+1:end))';
-Single2Mns=table2array(RMIMeans(RMIMeans.Red==2,end-NPcts+1:end))';
-RedMns=table2array(RMIMeans(RMIMeans.Red==3,end-NPcts+1:end))';
-SumSingleMns=table2array(RMIMeans(RMIMeans.Red==4,end-NPcts+1:end))';
-figure
-plot(Single1Mns,Prctiles,Single2Mns,Prctiles,RedMns,Prctiles,SumSingleMns,Prctiles);
-
-%% Compare the Vincentized Prctiles with those from RMItable. They should be identical.
-% These are not quite the same as the percentiles returned by MATLAB's prctile function,
-% because that function handles ties differently.
-Err1 = Vincentized.RTprctiles(Vincentized.Red==1,1:end) - table2array(RMIMeans(RMIMeans.Red==1,2:end));
-Err2 = Vincentized.RTprctiles(Vincentized.Red==2,1:end) - table2array(RMIMeans(RMIMeans.Red==2,2:end));
-Err3 = Vincentized.RTprctiles(Vincentized.Red==3,1:end) - table2array(RMIMeans(RMIMeans.Red==3,2:end));
-disp('The root mean square difference between the estimates is:');
-sqrt((sum(Err1.^2)+sum(Err2.^2)+sum(Err3.^2))/3/numel(Prctiles))
+CallMrf(RMITable,DVList,{},{'Red','Half'},'SubNo','RMITest1','Include',RMITable.Red>2);  % Include only condition numbers 3 & 4 (Redundant and SumSingle)
 
 
-%% Plot the difference between the redundant and sum-single curves based on spline-approximations
-% of both curves over the RT range where the two curves overlap.
+%% Compute Vincentized averages, then plot average CDFs and RMI violations.
 
-% find the range of t's where the curves overlap:
-tMin = max(RedMns(1),SumSingleMns(1));
-tMin = ceil(tMin);
-tMax = min(RedMns(end),SumSingleMns(end));
-tMax = floor(tMax);
-t = tMin:tMax;  % The list of time points at which CDF differences will be computed.
+%To compute Vincentized averages, just use CondMeans:
+VincentizedRMIMeans = CondMeans(RMITable,'Pct',{'Red','Half'});
 
-SplineRedCDF = spline(RedMns,Prctiles,t);  % The CDF values of the redundant curve at the indicated t values
-SplineSumSglCDF = spline(SumSingleMns,Prctiles,t);  % The CDF values of the sum-single curve at the indicated t values
-ViolCDF = SplineRedCDF - SplineSumSglCDF;  % These are the differences in CDFs between the two curves at each value of t
-figure
-plot(t,ViolCDF);
-xlabel('RT');
-ylabel('RMI Violation %');
+% Plot CDFs of single1, single2, red, sumsingle, separately for each combination of CondSpecs.
+PlotRMICDFs(VincentizedRMIMeans,'Red','Half',Prctiles);
+
+% Plot CDFs for an individual subject
+PlotRMICDFs(RMITable,'Red','Half',Prctiles,'Include',RMITable.SubNo==1);
+PlotRMICDFs(RMITable,'Red','Half',Prctiles,'Include',RMITable.SubNo==2);
+
+% Plot RMI violations
+[ t, Viol, figs ] = CondRMIViol(VincentizedRMIMeans,'Red','Half',Prctiles,'Plot');
+
+% %% NewJeff: Old checks from below
+% 
+% %% Compare the Vincentized Prctiles with those from RMItable. They should be identical.
+% % These are not quite the same as the percentiles returned by MATLAB's prctile function,
+% % because that function handles ties differently.
+% Err1 = Vincentized.RTprctiles(Vincentized.Red==1,1:end) - table2array(RMIMeans(RMIMeans.Red==1,2:end));
+% Err2 = Vincentized.RTprctiles(Vincentized.Red==2,1:end) - table2array(RMIMeans(RMIMeans.Red==2,2:end));
+% Err3 = Vincentized.RTprctiles(Vincentized.Red==3,1:end) - table2array(RMIMeans(RMIMeans.Red==3,2:end));
+% disp('The root mean square difference between the estimates is:');
+% sqrt((sum(Err1.^2)+sum(Err2.^2)+sum(Err3.^2))/3/numel(Prctiles))
+
+
 

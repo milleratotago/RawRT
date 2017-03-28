@@ -56,9 +56,9 @@ for i=1:ndims
     try
        Values{i}=unique(Trials.(ConditionDistinguished{i}));
     catch
-        temp = ConditionDistinguished{i}
-        temp2 = class(temp)
-        assert(false,[temp ' is not a legal variable name string.']);
+        NameNotFound = ConditionDistinguished{i}
+        NameClass = class(NameNotFound)
+        assert(false,[NameNotFound ' is not a legal variable name string.']);
     end
     Sizes(i)=numel(Values{i});
 end

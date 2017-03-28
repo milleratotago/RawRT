@@ -62,6 +62,7 @@ NaNIndices = [];  % Keep a list of any rows that have all NaNs.
 for iCond=1:NConds
     Indices = mySubTableIndices{iCond};
     TheseTrials = inTrials(Indices,:);
+    TheseTrials.(sDV) = floor(TheseTrials.(sDV)+0.5);  % The values must be integers.
     aX = TheseTrials.(sDV)(TheseTrials.(sRMISpec)==1);
     aY = TheseTrials.(sDV)(TheseTrials.(sRMISpec)==2);
     aRed = TheseTrials.(sDV)(TheseTrials.(sRMISpec)==3);
