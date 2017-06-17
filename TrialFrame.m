@@ -9,8 +9,8 @@ function Trials = TrialFrame(FactorNames,Levels,varargin)
 %   'Between'/'Nested',{{BetweenFactors},SubjectsFactor}: This argument is tricky!
 %           It is used to signal that some factors are between-Ss (i.e., nested in other factors).
 %           The argument is a cell array with 2 cells.
-%               1. Another cell array that is a list of the between-Ss factors.
-%               2. A string that is the name of the subjects factor.
+%               1. Another cell array that is a list of the between-Ss factors (which were already listed in FactorNames).
+%               2. A string that is the name of the subjects factor (which was also already listed in FactorNames).
 %           Examples:
 %             'Between',{{'A'},'S'}   % Factor A is a between-Ss factor, and the subjects factor is called 'S'.
 %             'Between',{{'A','C'},'Subj'}   % Factors A & B are between-Ss factors, and the subjects factor is called 'Subj'.
@@ -18,6 +18,9 @@ function Trials = TrialFrame(FactorNames,Levels,varargin)
 %              Example: 'Between',{{'A','C'},'Subj'},'Between',{{'A','C','Subj'},'Rep'}
 %              In this example, Subjects are nested in A and C, and then Replications are nested in A, C, and Subj.
 %           Note that the default is for no factors to be between-Ss (i.e., fully repeated-measures design).
+%           A full example: 2 x 3 between-Ss design with 7 Ss per group:
+%            TSim2 = TrialFrame({'AFac','BFac','Sub'},[2 3 7],'Between',{{'AFac','BFac'},'Sub'});
+%
 
 [DropVariables, varargin] = ExtractNameVali({'Drop','DropVar','DropVariable','DropVariables'},{},varargin);
 [SortVars, varargin] = ExtractNameVali({'Sort','SortBy','SortVars'},{},varargin);
@@ -88,7 +91,9 @@ if Shuffle
     SortVars = [SortVars {ShuffleVarName}];
 end
 
-Trials = sortrows(Trials,SortVars);
+if numel(SortVars) > 0
+    Trials = sortrows(Trials,SortVars);
+end
 
 if Shuffle
     Trials.(ShuffleVarName) = [];

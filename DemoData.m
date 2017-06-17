@@ -34,8 +34,8 @@ end
 
 if strcmpi(sName,'Demo0')
     Trials = Demo0Data;
-elseif strcmpi(sName,'Demo1')
-    Trials = Demo1Data;
+%elseif strcmpi(sName,'Demo1')
+%    Trials = Demo1Data;
 elseif strcmpi(sName,'DemoGroups')
     Trials = DemoGroupsData;
 elseif strcmpi(sName,'DemoBin')
@@ -51,7 +51,7 @@ elseif strcmpi(sName,'DemoSRCrosstab')
 elseif strcmpi(sName,'DemoSpearKar')
     Trials = DemoSpearKar;
 else
-    abort(['Unrecognized demo data set name: ' sName]);
+    assert(false,['Unrecognized demo data set name: ' sName]);
 end
 
 NTrials = height(Trials);

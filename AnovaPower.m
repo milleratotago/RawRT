@@ -5,7 +5,7 @@ classdef AnovaPower < handle
     properties
         
         alpha
-        tbl              % The ANOVA table, augmented with extra computations, simulation results, etc, as needed.
+        tbl               % The ANOVA table, augmented with extra computations, simulation results, etc, as needed.
         
         BetweenNames      % Cell array of names of between-Ss factors
         WithinNames       % Cell array of names of within-Ss factors
@@ -239,7 +239,8 @@ classdef AnovaPower < handle
             obj.tbl.CohenfSqr(obj.FixedSources) = obj.tbl.OmegaSqr(obj.FixedSources) ./ (1 - obj.tbl.OmegaSqr(obj.FixedSources));
         end
         
-        function setPowers(obj,TrueMeans,TrueSigmas,alpha)
+        function setPowerWithSigmas(obj,TrueMeans,TrueSigmas,alpha)
+        % Compute power levels from specified true means and sigmas.
             obj.setFcrits(alpha);
             obj.setSigmas(TrueSigmas);
             obj.setThetaSqrs(TrueMeans);
@@ -266,6 +267,25 @@ classdef AnovaPower < handle
             end
         end
         
+        function setPowerWithMSes(obj,TrueMeans,TrueMSerrors,alpha)
+        % Replacement for setPowerWithSigmas when you want to specify MSerror values rather than sigmas.
+        % It computes TrueSigmas from TrueMSerrors and then calls setPowerWithSigmas.
+        % Note the following limitation:
+        assert(obj.NReplications==1,'setPowerWithMSes can only be used with NReplications==1 (so far).');
+        TrueSigmas = zeros(size(TrueMSerrors));
+        % The values of TrueSigmas must be computed from the values of TrueMSerrors,
+        % and this depends on the design.
+        % The basic relation is that MSe = TrueSigma^2 * numbers of levels of all uninvolved within-Ss factors.
+        for iSigma = 1:numel(TrueSigmas)
+            sSource = obj.tbl.Properties.RowNames{obj.RandomSources(iSigma)};
+            UninvolvedWitFacs = obj.MissingFacs(sSource,obj.WithinNames);
+            NUninvolvedWit = prod(obj.WithinLevels(UninvolvedWitFacs));
+            TrueMSerrors(iSigma) = TrueMSerrors(iSigma) / NUninvolvedWit;
+            TrueSigmas(iSigma) = sqrt(TrueMSerrors(iSigma));
+        end
+        setPowerWithSigmas(obj,TrueMeans,TrueSigmas,alpha);
+        end
+
         function InitSims(obj)
             obj.NSims = 0;
             obj.tbl.obsSigp = zeros(obj.NSources,1);

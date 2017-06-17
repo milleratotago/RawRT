@@ -38,7 +38,7 @@ Trials = DemoData('DemoSpearKar');
 
 %% Compute PSE_SK, Sigma_SK, DL_SK for each subject separately,
 % pooling across blocks, and then run ANOVA on these 3 DVs:
-SubCondSK = CondSpearKar(Trials,'Stim','Resp',{'SubNo','Cond'});
+SubCondSK = CondSpearKar(Trials,'Stim','Resp',{'SubNo','Cond'},'Plot');
 BetweenFacs = {};  % None in this experiment.
 WithinFacs = {'Cond'};
 OutFileName = 'SubCondSK';

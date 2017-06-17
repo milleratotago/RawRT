@@ -44,9 +44,13 @@ pause
 
 CondPlot(Trials,'RT','Cond');    % Plot the mean RT in each condition.
 
+% Use better labels for condition 1,2,3; e.g.:
+Labels.Cond = {'Compatible','Neutral','Incompatible'};
+CondPlot(Trials,'RT','Cond','Labels',Labels);    % Plot the mean RT in each condition.
+
 CondPlot(Trials,'Cor','SubNo');  % Plot the mean Cor for each subject.
 
-CondPlot(Trials,'RT',{'SubNo','Cond'});  % Plot the mean RT for each subject in each condition.
+CondPlot(Trials,'RT',{'SubNo','Cond'},'Labels',Labels,'XEdge',.02);  % Plot the mean RT for each subject in each condition.
 
 CondPlot(Trials,'RT',{'SubNo','Cond','Blk'});    % Plot the mean RT for each subject in each condition in each block
                                                  % You may want to expand this picture.

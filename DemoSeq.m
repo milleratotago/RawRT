@@ -75,3 +75,11 @@ Trials.Seq( PrevIncompat  ) = 2;
 % Also exclude warm-up trials, since we marked them.
 CallMrf(Trials,'RT',{},{'Seq','Compat'},'SubNo','DemoSeq','Include',Trials.IncludeForRT&Trials.Seq>=1&Trials.Warmup==0);
 
+
+%% Example of how to save & analyze data from previous trial.
+% e.g., What is the correlation between the current trial's RT and the previous trial's RT?
+
+Trials.PrevRT = nan(height(Trials),1);
+Trials.PrevRT(2:end) = Trials.RT(1:end-1);  % This makes a new variable with the previous trial's RT.
+PrevSameBlock = SeqFinder(Trials,-1,'true','MustMatch',{'SubNo','Blk'});  % Exclude the first trial of each block, which has no real PrevRT.
+a=corr(Trials.RT(PrevSameBlock),Trials.PrevRT(PrevSameBlock))

@@ -28,11 +28,16 @@
 %    It is more complicated in within-subjects designs, because there are several different
 %    error terms, as shown in the ANOVA table (e.g., S, AS, BS, ABS, ...),
 %    each of which has its own standard deviation.
-%    In the future I hope to be provide more information about how to estimate
-%    these values; for now, I can only recommend trying various values and checking the
-%    Avg[MS] columns that you get in the simulations.  The idea is to pick sigmas
-%    for the S, AS, BS, etc that give you Avg[MS] comparable to those you have
-%    found in previous experiments with the same design & number of subjects.
+%
+%    Two options are provided for specifying error terms.
+%       setPowerWithSigmas: Use this if you can estimate the sigmas directly.
+%            In the future I hope to be provide more information about how to estimate sigmas.
+%            these values; for now, I can only recommend trying various values and checking the
+%            Avg[MS] columns that you get in the simulations.  The idea is to pick sigmas
+%            for the S, AS, BS, etc that give you Avg[MS] comparable to those you have
+%            found in previous experiments with the same design & number of subjects.
+%       setPowerWithMSes: Use this if you have MSe's from an ANOVA and you want estimated
+%            sigmas to be computed from from these MSe's.
 %
 %    There is one further complication to consider with respect to error terms,
 %    namely, what is here called "TrialError".  There are two cases:
@@ -85,7 +90,13 @@
 %        anything that is computed for each simulation.
 
 
-%% 1-Within Factor Example.
+% Note: Examples of using setPowerWithMSes are shown at the end of this file.
+
+% Set globally:
+NSims = 0;
+
+
+%% 1-Within Factor Example. (setPowerWithSigmas)
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -111,17 +122,15 @@ TrueSigmas = [...  % Specify these in the same order in which the random sources
     TrialError ...
     ];
 
-NSims = 0;
-
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -129,7 +138,7 @@ if NSims>0
     anvpwr.Report;
 end
 
-%% 2-Within Factor Example.
+%% 2-Within Factor Example. (setPowerWithSigmas)
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -159,17 +168,17 @@ TrueSigmas = [...  % Specify these in the same order in which the random sources
     TrialError ... % Error
     ];
 
-NSims = 0;
+% NSims = 0;
 
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -178,7 +187,7 @@ if NSims>0
 end
 
 
-%% 3-Within Factors Example.
+%% 3-Within Factors Example. (setPowerWithSigmas)
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -214,17 +223,17 @@ TrueSigmas = [...  % Specify in the same order in which the random sources appea
     TrialError ... % Error
     ];
 
-NSims = 0;
+% NSims = 0;
 
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -233,7 +242,7 @@ if NSims>0
 end
 
 
-%% 1-Between Example.
+%% 1-Between Example. (setPowerWithSigmas)
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -256,17 +265,17 @@ NTrials = 1;
 TrialError = 0;
 TrueSigmas = [32 TrialError];  % SABC, Error
 
-NSims = 0;
+% NSims = 0;
 
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -275,7 +284,7 @@ if NSims>0
 end
 
 
-%% 2-Between Example.
+%% 2-Between Example. (setPowerWithSigmas)
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -299,17 +308,17 @@ NTrials = 1;
 TrialError = 0;
 TrueSigmas = [32 TrialError];  % SABC, Error
 
-NSims = 0;
+% NSims = 0;
 
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -318,7 +327,8 @@ if NSims>0
 end
 
 
-%% 3-Between Example from G*Power documentation section 11.3, pages 27 ff
+%% 3-Between Example. (setPowerWithSigmas)
+% from G*Power documentation section 11.3, pages 27 ff
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -349,17 +359,17 @@ NTrials = 1;
 TrialError = 0;
 TrueSigmas = [sigmaSABC TrialError];  % SABC, Error
 
-NSims = 0;
+% NSims = 0;
 
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -369,7 +379,7 @@ end
 
 
 
-%% 2-Mixed Example
+%% 2-Mixed Example. (setPowerWithSigmas)
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -393,17 +403,17 @@ NTrials = 1;
 TrialError = 0;
 TrueSigmas = [54 24 TrialError];  % SA, BSA, Error
 
-NSims = 0;
+% NSims = 0;
 
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -412,7 +422,7 @@ if NSims>0
 end
 
 
-%% 3-Mixed Example, 2 Within
+%% 3-Mixed (2 Within) Example. (setPowerWithSigmas)
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -439,17 +449,17 @@ NTrials = 1;
 TrialError = 0;
 TrueSigmas = [54 24 22 12 TrialError];  % SA, BSA, CSA, BCSA, Error
 
-NSims = 0;
+% NSims = 0;
 
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
 %  ************************************
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -458,7 +468,7 @@ if NSims>0
 end
 
 
-%% 3-Mixed Example, 2 Between
+%% 3-Mixed (2 Between) Example. (setPowerWithSigmas)
 
 %  ************************************
 %  *** PARAMETERS TO BE SET START HERE
@@ -485,7 +495,7 @@ NTrials = 1;
 TrialError = 0;
 TrueSigmas = [54 24 TrialError];  % SAC, BSAC, Error
 
-NSims = 0;
+% NSims = 0;
 
 %  ************************************
 %  *** END OF PARAMETERS TO BE SET ****
@@ -493,10 +503,10 @@ NSims = 0;
 
 anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
 
-anvpwr.setPowers(TrueMeans,TrueSigmas,alpha)
+anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if NSims>0
+if exist('NSims') & NSims>0
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -504,4 +514,64 @@ if NSims>0
     anvpwr.Report;
 end
 
+
+% **** setPowerWithMSes examples start here ****
+% In these examples, the first steps are to generate a simulated data set
+% and run an ANOVA on it to get the MSes.  In practice, you would have
+% your own real data set and run an ANOVA on it to get the MSes
+
+%% 2-Within Factor Example. (setPowerWithMSes)
+
+alpha = .05;
+
+% Generate some simulated data to use for an illustration.
+% Within-Ss design: 20 Ss x 4 blocks x 3 conditions:
+Trials = DemoData('Demo0');
+
+% These parameters describe the data (which is already in Trials):
+BetweenFacs = {};
+BetweenLevels = [];
+WithinFacs = {'Blk', 'Cond'};
+WithinLevels = [4 3];
+SubName = 'SubNo';
+NSubsPerGroup = 20;
+
+% Do ANOVA on the simulated data, as you would on your own data, in order to get MSe's.
+[p0, tbl0, stats0] = CallAnovan(Trials,'RT',BetweenFacs,WithinFacs,SubName,'Function',@mean,'NoDisplay');
+
+BetterTbl = anovantbl2table(tbl0);  % convert anovan output table to a more user-friendly format
+
+% Now the MSes can be extracted from the results of the ANOVA computed by anovan
+MSes = [...  % Specify these in the same order in which the random sources appear in the ANOVA table
+    BetterTbl.MeanSq{SubName} ... % S
+    BetterTbl.MeanSq{[WithinFacs{1} SubName]}... % AS
+    BetterTbl.MeanSq{[WithinFacs{2} SubName]}... % BS
+    BetterTbl.MeanSq{[WithinFacs{1} WithinFacs{2} SubName]}... % ABS
+    ];
+
+% Now that we have MSe's, we can compute power for any hypothetical true effect size.
+% Suppose I want to compute power to detect the following condition effect
+% (I don't care about the block effect or interaction):
+TrueMeans = [ ...   % 4x3
+    % Cond1  Cond2  Cond3
+       367     370    370 ...  % Blk1
+       367     370    370 ...  % Blk2
+       367     370    370 ...  % Blk3
+       367     370    372 ...  % Blk4
+    ];
+
+NTrials = 1;
+% NSims = 0;
+
+anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NSubsPerGroup,NTrials);
+anvpwr.setPowerWithMSes(TrueMeans,MSes,alpha)
+anvpwr.Report;
+
+if exist('NSims') & NSims>0
+    anvpwr.InitSims;
+    for iSim=1:NSims
+        anvpwr.SimulateOne;
+    end
+    anvpwr.Report;
+end
 
