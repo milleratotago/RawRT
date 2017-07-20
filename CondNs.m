@@ -2,7 +2,7 @@ function [outResultTable, outDVName] = CondNs(inTrials,CondSpecs,varargin)
 %
 % Include/Exclude options passed through to SubTableIndices.
 
-[inTrials, varargin] = MaybeSelect(inTrials,varargin{:});
+% [inTrials, varargin] = MaybeSelect(inTrials,varargin{:})
 
 [mySubTableIndices, outResultTable] = SubTableIndices(inTrials,CondSpecs,varargin{:});
 

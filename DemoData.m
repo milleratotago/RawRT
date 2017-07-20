@@ -50,6 +50,10 @@ elseif strcmpi(sName,'DemoSRCrosstab')
     Trials = DemoSRCrosstab;
 elseif strcmpi(sName,'DemoSpearKar')
     Trials = DemoSpearKar;
+elseif strcmpi(sName,'DemoPaired')
+    Trials = DemoPairedData;
+elseif strcmpi(sName,'DemoCondSummaryScores')
+    Trials = DemoCondSummaryScoresData;
 else
     assert(false,['Unrecognized demo data set name: ' sName]);
 end
@@ -300,3 +304,45 @@ Trials.Resp = 2*ones(height(Trials),1);  % Default response is 2 = 'larger'
 Trials.Resp(Trials.Stim<Trials.Threshold) = 1;
 Trials.Threshold = [];
 end
+
+
+function Trials = DemoPairedData
+
+% Red refers to the redundancy condition whose effect we will look at.
+%  Red=1 & Red=2 are the single-stimulus conditions, and Red=3 is redundant.
+FNames  = {'SubNo', 'Blk', 'Trty', 'Replic'};
+FLevels = [   15      2       3      10    ];
+Trials = TrialFrame(FNames,FLevels,'Shuffle','Drop','Replic','SortBy',{'SubNo','Blk'});
+NTrials = height(Trials);
+
+% Generate RTs:
+RTmn = 500;
+RTsd =  50;
+RT2Increment = 10;
+RT3Increment = 10;
+
+Trials.RT1 = randn(NTrials,1)*RTsd + RTmn;
+Trials.RT2 = randn(NTrials,1)*RTsd + RTmn;
+Trials.RT2 = 0.7*Trials.RT1 + 0.3*Trials.RT2 + RT2Increment;
+Trials.RT3 = randn(NTrials,1)*RTsd + RTmn + RT3Increment;
+
+end
+
+
+
+function Trials = DemoCondSummaryScoresData
+% Imagine that firing rates are recorded from single cells.
+% In each trial the firing rate is first observed during a 2 s baseline period,
+% and then it is observed again for 2 s after stimulus onset.
+% Subjects are different birds (say),
+
+FNames  = {'Bird', 'Cell', 'Trial'};
+FLevels = [   15      10      30    ];
+Trials = TrialFrame(FNames,FLevels,'Shuffle','Drop','Trial','SortBy',{'Bird','Cell'});
+NTrials = height(Trials);
+
+Trials.Baseline = 2*rand(NTrials,1);
+Trials.Stim = 2.4*rand(NTrials,1);  % True firing rate is higher for Stim than baselind
+
+end
+

@@ -22,7 +22,7 @@ if NPassThru>0
     PassThruArgs = varargin(FirstPassThruArgPos:FirstPassThruArgPos+NPassThru-1);
     varargin(FirstPassThruArgPos:FirstPassThruArgPos+NPassThru-1) = [];
 else
-    PassThruArgs = [];
+    PassThruArgs = {};
 end
 
 [mySubTableIndices, outResultTable] = SubTableIndices(inTrials,CondSpecs,varargin{:});

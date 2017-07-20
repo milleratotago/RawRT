@@ -1,38 +1,33 @@
-function [outResultTable, outDVNames] = CondCorrs(inTable,sDV1,sDV2,CondSpecs,Degree,varargin)
-% For each combination of CondSpecs, compute the linear/nonlinear prediction
-% of sDV2 from sDV1 across all rows with that combination.
+function [outResultTable, outDVNames] = CondCorrs(inTable,sDV1,sDV2,CondSpecs,varargin)
+% For each combination of CondSpecs, compute the correlation of SDV1 & sDV2
+% across all rows with that combination.
+% NewJeff: Add 'permute' option to estimate p based on random permutations.
 
-sModel = [sDV2 '~' sDV1];
-for iDeg = 2:Degree
-    PwrName = UniqueVarname(inTable,['Pwr' num2str(iDeg)]);
-    inTable.(PwrName) = inTable.(sDV1).^iDeg;
-    sModel = [sModel '+' PwrName];  %#ok<AGROW>
-end
+% Optional parameter: 'Parms',{CellArray of optional parms to be passed to the corr function}.
+%   Example: t = CondCorrs(inTable,sDV1,sDV2,CondSpecs,'Parms',{'Type','Spearman'})
+%   Note that the corr function accepts these optional parameters, e.g., rs = corr(x,y,'Type','Spearman');
 
-[outResultTable, outDVNames1] = CondFunsOfTrials(inTable,CondSpecs,@Fit,varargin{:},'NPassThru',1,sModel);
+[Parms, varargin] = ExtractNameVali('Parms',{},varargin);
 
-% Break up and relabel the fitting-related variables in the output table.
-NDVsOut = Degree + 3; % Intercept, Slopes, Rsqr, RMSE
+[outResultTable, outDVNames1] = CondFunsOfTrials(inTable,CondSpecs,@Compute,varargin{:},'NPassThru',2+numel(Parms),sDV1,sDV2,Parms{:});
+
+% Break up and relabel the multiple output variables in the output table.
+NDVsOut = 2; % r p
 outDVNames = cell(NDVsOut,1);
-outDVNames{1} = UniqueVarname(outResultTable,'Intercept');
-outResultTable.(outDVNames{1}) = outResultTable.(outDVNames1{1})(:,1);
-for i=1:Degree
-    outDVNames{i+1} = UniqueVarname(outResultTable,['Slope' num2str(i)]);
-    outResultTable.(outDVNames{i+1}) = outResultTable.(outDVNames1{1})(:,i+1);
+outDVNames{1} = UniqueVarname(outResultTable,'r');
+outDVNames{2} = UniqueVarname(outResultTable,'p');
+for i=1:NDVsOut
+    outResultTable.(outDVNames{i}) = outResultTable.(outDVNames1{1})(:,i);
 end
-outDVNames{Degree+2} = UniqueVarname(outResultTable,'Rsqr');
-outDVNames{Degree+3} = UniqueVarname(outResultTable,'RMSE');
-outResultTable.(outDVNames{Degree+2}) = outResultTable.(outDVNames1{1})(:,Degree+2);
-outResultTable.(outDVNames{Degree+3}) = outResultTable.(outDVNames1{1})(:,Degree+3);
 
 % Remove the variable that held all of the output components.
 outResultTable.(outDVNames1{1}) = [];
 
 end
 
-function out = Fit(inTable,sModel)
-lm = fitlm(inTable,sModel); 
-% Note that the output is a list of several component values:
-out = [lm.Coefficients.Estimate(:)' lm.Rsquared.Ordinary lm.RMSE];
+% Cannot be nested so that sDV1 and sDV2 are recognized.
+function out = Compute(inTable,sDV1,sDV2,varargin)
+[r,p] = corr(inTable.(sDV1),inTable.(sDV2),varargin{:});
+out = [r p];
 end
 

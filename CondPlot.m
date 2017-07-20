@@ -42,6 +42,8 @@ function figout = CondPlot(Trials, DVs, CondSpecs, varargin)
 %   'XEdge',Proportion: Proportion is the proportion of the X axis that is unused at each side of the graph.
 %             Note that the default proportion is >0 because I like gaps at the left & right edges of the plots.
 %
+%   'YLabel',sYLabel: sYLabel is a string used to label the Y axis.  Otherwise, it is labelled 'function(yDV)'
+%
 % The output is a figure handle
 
 [Trials, varargin] = MaybeSelect(Trials,varargin{:});
@@ -59,6 +61,7 @@ sLineTypes = {'-ok', '--ok', ':ok', '-.ok', '-sk', '--sk', ':sk', '-.sk'};  % Ne
 [NoLinkAxes, varargin] = ExtractNamei('NoLinkAxes',varargin);
 [FigName, varargin] = ExtractNameVali('SaveFile','',varargin);
 [XEdge, varargin] = ExtractNameVali('XEdge',0.15,varargin);
+[sYLabel, varargin] = ExtractNameVali('YLabel','',varargin);
 
 LinkAxes = ~NoLinkAxes;
 
@@ -105,7 +108,10 @@ else
     NCols = 1;
 end
 
-sFunc = func2str(ThisFun);
+if numel(sYLabel)==0
+   sFunc = func2str(ThisFun);
+   sYLabel = [sFunc '(' yDV ')'];
+end
 
 figout = figure(FigParms{:});
 set(figout,'DefaultAxesFontSize',DefaultAxesFontSize);
@@ -116,6 +122,8 @@ set(figout,'DefaultAxesLineWidth',DefaultAxesLineWidth);
 TheseX = ExtractAsArray(Trials,{xDV},CondSpecs);  % This array can have more than 2 dimensions, which plot cannot handle.
 TheseY = ExtractAsArray(Trials,{yDV},CondSpecs,'Function',ThisFun,varargin{:});  % This array can have more than 2 dimensions, which plot cannot handle.
 iPlot = 0;
+xmins = zeros(NLines,1);  % Keep track of min & max X's across all lines
+xmaxs = zeros(NLines,1);
 for iRow=1:NRows
     for iCol=1:NCols
         iPlot = iPlot + 1;
@@ -148,19 +156,21 @@ for iRow=1:NRows
             if iLine==1
                 hold on;
             end
-        end
+            xmins(iLine) = min(Xs);
+            xmaxs(iLine) = max(Xs);
+        end  % iLine
         ax = gca;  % Get the axis info
         if XEdge>0
-            xlims = [min(Xs) max(Xs)];
+            xlims = [min(xmins) max(xmaxs)];
             xwidth = xlims(2) - xlims(1);
             ax.XLim(1) = xlims(1) - XEdge*xwidth;
             ax.XLim(2) = xlims(2) + XEdge*xwidth;
         end
-        ax.XTick = Xs;
+        % ax.XTick = Xs;  % This just uses the Xs from the last line.
         if UseLabels && isfield(Labels,CondSpecs{1})
             ax.XTickLabel = Labels.(CondSpecs{1});
         end
-        ylabel([sFunc '(' yDV ')']);
+        ylabel(sYLabel);
         if iRow==NRows
             xlabel(strrep(xDV,'_',' '));
         end
