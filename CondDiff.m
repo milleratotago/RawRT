@@ -2,6 +2,7 @@ function ResultTable = CondDiff(Trials,sDVs,CondSpecs,sDifferenceSpec,PlusLevel,
 % For each combination defined by CondSpecs, compute the difference
 % DifferenceSpec(PlusLevel) - DifferenceSpec(MinusLevel),
 % averaging across any other (unspecified) dimensions of the Trials dataset.
+% PlusLevel and MinusLevel are specified as integers, 1 to the number of distinct values of sDifferenceSpec.
 %
 % Include/Exclude options passed through to SubTableIndices.
 

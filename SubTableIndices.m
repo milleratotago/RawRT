@@ -19,7 +19,7 @@ function [outIndices, outCondLabels] = SubTableIndices(Trials,CondSpecs,varargin
 [ExcludeIndicators, outArg] = ExtractNameVali('Exclude',zeros(height(Trials),1),outArg);
 
 if numel(CondSpecs)==0
-    % Inclulde all selected trials in a single condition.
+    % Include all selected trials in a single condition.
     NConds = 1;
     outIndices = cell(NConds,1);
     outIndices{1} = find(IncludeIndicators&~ExcludeIndicators);
@@ -47,7 +47,8 @@ for iCond=1:NConds
     sTarg = '';
     for iSpec=1:NSpecs
         tempoutCondLabels.(CondSpecs{iSpec})(iCond) = CondCombos(iCond,iSpec);
-        ThisSpec = ['Trials.' CondSpecs{iSpec} '==' num2str(CondCombos(iCond,iSpec))];
+%       ThisSpec = ['Trials.' CondSpecs{iSpec} '==' num2str(CondCombos(iCond,iSpec))];  % This has problems with floating point precision.
+        ThisSpec = ['abs(Trials.' CondSpecs{iSpec} '-' num2str(CondCombos(iCond,iSpec)) ')<=eps'];
         sTarg = [sTarg ThisSpec];
         if iSpec<NSpecs
             sTarg = [sTarg '&'];

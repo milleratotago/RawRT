@@ -19,10 +19,10 @@ function [DVBinMeans, BinDiffsAvgs, DeltaVsMean, DeltaVsMeanNames, BinAssignment
 %   Jitter: passed through to CondBinLabels
 %
 % Outputs:
-%   BinMeans  : Mean RT as f(
-%   BinDiffsAvgs
-%   DeltaVsMean
-%   DeltaVsMeanNames
+%   DVBinMeans  : A table of the mean values of the DV, separately for each combination of CondSpecs, sDiffSpec, & Bin.
+%   BinDiffsAvgs: A combined table of the mean values of the DV & the condition effect (difference) for each value of CondSpec.
+%   DeltaVsMean: A table for each CondSpec of the intercept, slope(s), p, Rsqr & RMSE of the PolyDegree fit of the effect size against the bin mean.
+%   DeltaVsMeanNames: The names of the variables in DeltaVsMean.
 %   BinAssignments: A trial-by-trial list indicating the bin assignment of each trial.
 
 % Here is the procedure:
@@ -66,6 +66,6 @@ BinDiffsAvgs = RTBinAvgs;
 sDiffsName = UniqueVarname(BinDiffsAvgs,[sDV 'BinDiffs']);
 BinDiffsAvgs.(sDiffsName) = DVBinDiffs.(DVBinDiffsNames{1});
 
-[DeltaVsMean, DeltaVsMeanNames] = CondCorrs(BinDiffsAvgs,sAvgsName,sDiffsName,CondSpecs,PolyDegree);
+[DeltaVsMean, DeltaVsMeanNames] = CondRegr(BinDiffsAvgs,sAvgsName,sDiffsName,CondSpecs,PolyDegree);
 
 end

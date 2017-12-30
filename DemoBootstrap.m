@@ -2,6 +2,8 @@
 %   * CondBootsample: Generate bootstrap samples one by one, which you can then analyze however you want.
 %   * CondBootstrap: Generate bootstrap samples and do a specific analysis on each one.
 
+% NEWJEFF: Add CondCIs
+
 %% Generate some simulated data for a demonstration.
 Trials = DemoData('DemoPaired');
 

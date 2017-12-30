@@ -26,6 +26,9 @@ SubFac = 'SubNo';              % name of variable coding subjects factor
 OutFileName = 'DemoGroupBlkCondRT';     % name used to write ANOVA output file
 CallMrf(Trials,DVs,BetweenFac,WithinFac,SubFac,OutFileName);
 
+% Redo this test with unequal group sizes; this requires mrfub.exe
+CallMrf(Trials,DVs,BetweenFac,WithinFac,SubFac,[OutFileName 'Uneq'],'Include',~(Trials.SubNo==13));
+
 
 %% Correlate the effect size with the mean RT, correlating across Ss.
 CondMeansTable = CondMeans(Trials,'RT',{'SubNo','Group','Cond'});
@@ -47,4 +50,5 @@ plot(SubMeans.RT(SubMeans.Group==1),EffSize.RTDiffCond2vs1(EffSize.Group==1),' b
 plot(SubMeans.RT(SubMeans.Group==2),EffSize.RTDiffCond2vs1(EffSize.Group==2),' go')
 plot(SubMeans.RT(SubMeans.Group==3),EffSize.RTDiffCond2vs1(EffSize.Group==3),' ro')
 legend('Group 1','Group 2','Group 3')
+
 

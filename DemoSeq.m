@@ -3,7 +3,7 @@
 %   * identify & exclude trials following errors
 %   * classify each trial according to the condition of the trial that preceded it
 %   * perform ANOVA with "previous trial type" as a factor
-% The crucial new function for these things is:
+% One useful but rather slow new function for these things is:
 %   SeqFinder(Trials,Offset,sCondition) --- check its header for documentation.
 
 %% Generate some simulated data for a demonstration.
@@ -15,6 +15,31 @@ NTrials = height(Trials);  % Count the trials--often useful.
 Trials.IncludeForRT = Trials.Cor==1;  % Maybe also check RT outlier cutoffs, etc, as you wish.
 
 
+%% Part 1: A simple way to do many things, without SeqFinder:
+
+% This method is based on creating a new variable which holds, for each trial,
+% some information about the relevant previous trial.
+
+% For example, suppose you wanted to look at the correlation between the
+% RTs of successive trials.  Start by making this new variable:
+PrevRT = [nan; Trials.RT(1:end-1)];  % This makes a column with the previous trial's RT.
+                                     % Trial 1's PrevRT is nan because there was no previous trial's RT.
+% You could now correlate RT and PrevRT, but this is not exactly what you want.
+% Remember, Trials is one big long table with all Ss and blocks listed successively.
+% When it switches from one S to the next, the PrevRT of the first trial for one S
+% is actually the RT of the last trial from the previous S.
+% Similarly, PrevRT for the first trial of a block is the RT of the last trial in the
+% preceding block.
+% It probably makes sense to exclude these "transition" trials from the analysis,
+% which can be done by setting up some other codes:
+PrevSub = [nan; Trials.SubNum(1:end-1)];
+PrevBlock = [nan; Trials.BlkNum(1:end-1)];
+Trials.PrevTrialOK = (Trials.SubNum == PrevSub) & (Trials.BlkNum == PrevBlock);
+% Now include in analyses only trials with Trials.PrevTrialOK.
+
+% NEWJEFF: Part 1 not tested
+
+%% Part 2: Using SeqFinder (sometimes more convenient, but slower):
 %% %%%%% Exclude warm-up trials at the beginning of each block; e.g., the first four trials:
 
 Trials.Warmup = ones(NTrials,1);    % Use 1 to indicate warm-up trials; initially, make every trial a warm-up trial by default.

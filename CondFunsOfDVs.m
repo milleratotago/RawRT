@@ -11,6 +11,8 @@ function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,Fu
 %   Include/Exclude options passed through to SubTableIndices.
 %   'SaveNaNs' indicates that the output should include rows for which all computed values are NaNs.
 %             By default these all-NaN rows are deleted.
+%   'ShortNames' indicates that the names of the output variables should be the same as
+%                the names of the input variables, _without_ appending the function name.
 
 [sDVs, NDVs] = EnsureCell(sDVs);
 
@@ -18,6 +20,8 @@ function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,Fu
 
 [SaveNaNs, varargin] = ExtractNamei('SaveNaNs',varargin);
 DropNaNs = ~SaveNaNs;
+
+[ShortNames, varargin] = ExtractNamei('ShortNames',varargin);
 
 [NPassThru, varargin, FirstPassThruArgPos] = ExtractNameVali('NPassThru',0,varargin);  % Save NPassThru arguments for passing to FunHandle
 if NPassThru>0
@@ -33,8 +37,14 @@ NConds = height(outResultTable);
 % Make names for computed columns in output table:
 outDVNames = cell(NDVs,NFuns);
 for iDV=1:NDVs
+    siDV = sDVs{iDV};
     for iFun=1:NFuns
-        outDVNames{iDV,iFun} = UniqueVarname(outResultTable,[sDVs{iDV} func2str(FunHandleCellArray{iFun})]);
+        if ~ShortNames
+            siDVj = [siDV '_' func2str(FunHandleCellArray{iFun})];
+        else
+            siDVj = siDV;
+        end
+        outDVNames{iDV,iFun} = UniqueVarname(outResultTable,siDVj);
     end
 end
 

@@ -18,11 +18,11 @@ function PermutedValues = CondPermute(inTrials,sDV,CondSpecs,varargin)
 
 PermutedValues = inTrials.(sDV);  % Initialize to the original values.
 
-[mySubTableIndices, CondLabels] = SubTableIndices(inTrials,CondSpecs,varargin{:});
+mySubTableIndices = SubTableIndices(inTrials,CondSpecs,varargin{:});
 
-NConds = height(CondLabels);
-MaxNNeeded = max(cellfun(@numel,mySubTableIndices));
-AssignVals = zeros(MaxNNeeded,1);
+NConds = numel(mySubTableIndices);
+% MaxNNeeded = max(cellfun(@numel,mySubTableIndices));
+% AssignVals = zeros(MaxNNeeded,1);
 
 for iCond = 1:NConds
     Indices = mySubTableIndices{iCond};

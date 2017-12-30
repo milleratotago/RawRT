@@ -33,7 +33,11 @@ outResultTable.(outDVNames1{1}) = [];
 end
 
 function out = Fit(inTable,sModel)
-lm = fitlm(inTable,sModel); 
+try
+lm = fitlm(inTable,sModel);
+catch
+    pause  % NEWJEFF
+end
 % Note that the output is a list of several component values:
 out = [lm.Coefficients.Estimate(:)' coefTest(lm) lm.Rsquared.Ordinary lm.RMSE];
 end

@@ -2,6 +2,8 @@ function sysResult = CallMrf(Trials,sDV,BetweenFacs,WithinFacs,SubjectSpec,sOutF
 % Call the MrF program (mrfb.exe or mrfub.exe) to compute ANOVAs on the variables listed in sDV.
 % For more information on this program, see:   https://web.psy.otago.ac.nz/miller/progs/mrf.zip
 
+% NEWJEFF: mrfub has a shorter limit on the length of a factor name.  Should probably check for that or update mrfub.
+
 % Required input arguments:
 %   sDV: Name(s) of the DV(s) to be analyzed.  If 2+ DVs are specified (in a cell array), ANOVAs are run separately for each one.
 %   BetweenFacs: A cell array, possibly empty, listing the names of the variables coding the between-Ss factors.

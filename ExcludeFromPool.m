@@ -12,6 +12,8 @@ function [FinalPool, Report, NExclude, PctExclude] = ExcludeFromPool(StartingPoo
 % varargin: A set of 0/nonzero indicators, where nonzero indicates
 %  that a trial should be excluded.
 %
+% Optional input: 'Silent' => do not display the report.
+%
 % Outputs:
 %
 % FinalPool: A revised set of 0/nonzero indicators, one per trial,
@@ -27,6 +29,8 @@ function [FinalPool, Report, NExclude, PctExclude] = ExcludeFromPool(StartingPoo
 % PctExclude: The percentage of the starting pool that was excluded.
 
 FinalPool = StartingPool;
+
+[Silent, varargin] = ExtractNamei('Silent',varargin);
 
 NCriteria = numel(varargin);  % Number of criteria used to exclude criteria.
 
@@ -70,9 +74,10 @@ sFinal  = sprintf('%s\n',[sPrefix ' Final pool of ' num2str(NFinalPool) ' trials
 
 Report = [Report {sDelim} {sTotal} {sDelim} {sFinal}];
 
-s = strjoin(Report,'\n');  % Display the report.
-
-disp(s);
+if ~Silent
+    s = strjoin(Report,'\n');  % Display the report.
+    disp(s);
+end
 
 end
 

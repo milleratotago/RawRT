@@ -14,16 +14,26 @@ function Trials = ReadTrialsTable(SubList,FNamePat,varargin)
 Trials = table;
 nSubs = 0;
 for iSub=SubList
-   % SubStr = num2str(iSub,'%03d');
-   % fileName = ['M1701-' SubStr '.txt'];
-   fileName = sprintf(FNamePat,iSub);
-   try
-       T1 = readtable(fileName,varargin{:}); % 'ReadVariableNames',true,'HeaderLines',NHeaderLines);
-       Trials = [Trials; T1];
-       nSubs = nSubs + 1;
-   catch
-       fprintf('Unable to read data for subject %d.\n',iSub);
-   end
+    % SubStr = num2str(iSub,'%03d');
+    % fileName = ['M1701-' SubStr '.txt'];
+    fileName = sprintf(FNamePat,iSub);
+    try
+        T1 = readtable(fileName,varargin{:}); % 'ReadVariableNames',true,'HeaderLines',NHeaderLines);
+    catch
+        fprintf('Unable to read data for subject %d.\n',iSub);
+    end
+    try
+        Trials = [Trials; T1]; %#ok<AGROW>
+    catch
+        fprintf('Mismatching variable names for subject %d.\n',iSub);
+        fprintf('Usual variable names:');
+        fprintf(' %s',Trials.Properties.VariableNames{:});
+        fprintf('\n');
+        fprintf('Variable names for subject %d:');
+        fprintf(' %s',T1.Properties.VariableNames{:});
+        fprintf('\n');
+    end
+    nSubs = nSubs + 1;
 end
 
 fprintf('Found %d trials for %d subjects.\n',height(Trials),nSubs);

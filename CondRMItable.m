@@ -110,14 +110,15 @@ sScores  = UniqueVarname(outResultTable,'Pct');
 outResultTable = stack(outResultTable,CondNames,'NewDataVariableName',sScores,'IndexVariableName',sRMISpec);
 outResultTable.(sRMISpec) = double(ordinal(outResultTable.(sRMISpec),{},CondNames));
 
-outDVNames = cell(NPcts,1);
+outDVNames = cell(NPcts+1,1);
+outDVNames{1} = sScores;
 for iPct = 1:NPcts
     PctSuffix = num2str(Prctiles(iPct)*1000,'%03.0f');
-    outDVNames{iPct} = [sDV '_' PctSuffix];
+    outDVNames{iPct+1} = [sDV '_' PctSuffix];
 end
 
 for iPct = 1:NPcts
-    outResultTable.(outDVNames{iPct}) = outResultTable.(sScores)(:,iPct);
+    outResultTable.(outDVNames{iPct+1}) = outResultTable.(sScores)(:,iPct);
 end
 
 % outResultTable.(sScores) = [];

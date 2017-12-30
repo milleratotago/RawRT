@@ -40,6 +40,10 @@ for iCond = 1:NConds
     OneSubTable = inTrials(mySubTableIndices{iCond},:);
     NaNCtr = 0;
     for iFun=1:NFuns
+        if height(OneSubTable)==0  % NEWJEFF
+            disp('Error in CondFunsOfTrials: No lines in table.')
+            pause
+        end
         OneResult = FunHandleCellArray{iFun}(OneSubTable,PassThruArgs{:});
         if iCond==1
             outResultTable.(outDVNames{iFun}) = NaN(NConds,numel(OneResult));

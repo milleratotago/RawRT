@@ -35,6 +35,11 @@ else
     [p,h,stats] = signrank(inTable.(sDV1),inTable.(sDV2),varargin{:});
 end
 % Note that the output is a list of several component values:
-out = [p h stats.zval stats.signedrank];
+if isfield(stats,'zval')
+    thisz = stats.zval;  % Only returns z for largish samples.
+else
+    thisz = nan;
+end
+out = [p h thisz stats.signedrank];
 end
 
