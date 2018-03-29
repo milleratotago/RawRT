@@ -75,8 +75,9 @@ MeansTable = CondMeans(Trials,'RT',{'SubNo','Cond'});
 % the Trials table.  Therefore, the same commands can be used.  For example:
 CondPlot(MeansTable,'RT','Cond');   % Plot the mean RT in each condition.
 
-%% Make other tables with the N, mean, sd, median, min, & max for each subject in each condition:
-NsTable = CondNs(Trials,{'SubNo','Cond'});  % No need to specify a DV since you are just counting trials.
+%% Make other tables with the N & proportion of trials, mean RT, sd of RT, median RT, min, & max for each subject in each condition:
+NsTable = CondNs(Trials,{'SubNo','Cond'});  % N of trials per condition: No need to specify a DV since you are just counting trials.
+PropsTable = CondProps(Trials,{'SubNo','Cond'});  % Proportion of trials per condition; again no need to specify a DV.
 SDsTable = CondSDs(Trials,'RT',{'SubNo','Cond'});
 MediansTable = CondMedians(Trials,'RT',{'SubNo','Cond'});
 

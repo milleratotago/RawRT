@@ -51,8 +51,8 @@ disp('Normally you would pause here to check the block averages and decide wheth
 % You might indicate the list of practice blocks manually, like this:
 PracBlkList = [1];
 
-% Set up a new variable to label trials from bad Ss,
-Trials.Practice = ismember(Trials.SubNo,PracBlkList);
+% Set up a new variable to label trials from practice blocks:
+Trials.Practice = ismember(Trials.Blk,PracBlkList);
 
 
 %% For this demo, I will use all good S's non-practice trials in the analyses of PC.
