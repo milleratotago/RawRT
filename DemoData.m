@@ -54,6 +54,8 @@ elseif strcmpi(sName,'DemoPaired')
     Trials = DemoPairedData;
 elseif strcmpi(sName,'DemoCondSummaryScores')
     Trials = DemoCondSummaryScoresData;
+elseif strcmpi(sName,'DemoFitDist')
+    Trials = DemoFitDistData;
 else
     assert(false,['Unrecognized demo data set name: ' sName]);
 end
@@ -343,6 +345,26 @@ NTrials = height(Trials);
 
 Trials.Baseline = 2*rand(NTrials,1);
 Trials.Stim = 2.4*rand(NTrials,1);  % True firing rate is higher for Stim than baselind
+
+end
+
+
+
+function Trials = DemoFitDistData
+% Cond refers to the condition whose effect we will look at.
+FNames  = {'SubNo', 'Blk', 'Cond', 'Replic'};
+FLevels = [    5      2       2      25    ];
+Trials = TrialFrame(FNames,FLevels,'Shuffle','Drop','Replic','SortBy',{'SubNo','Blk'});
+NTrials = height(Trials);
+
+% Generate RTs:
+RTmn = 500;
+RTsd =  50;
+
+RTCondEff = 100;       % Increase to make a bigger RT difference between conditions (Cond 2 slower).
+
+Trials.RT = randn(NTrials,1)*RTsd + RTmn ... % sort of an RT baseline
+             + RTCondEff*(Trials.Cond-1);    % Add in an effect for condition 2
 
 end
 

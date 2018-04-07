@@ -39,6 +39,12 @@ catch
     pause  % NEWJEFF
 end
 % Note that the output is a list of several component values:
-out = [lm.Coefficients.Estimate(:)' coefTest(lm) lm.Rsquared.Ordinary lm.RMSE];
+if lm.DFE>0
+    testval = coefTest(lm);
+else
+    % Can't do the test if DFE=0 but may want estimates
+    testval = nan;
+end
+out = [lm.Coefficients.Estimate(:)' testval lm.Rsquared.Ordinary lm.RMSE];
 end
 

@@ -40,6 +40,11 @@ function [DVBinMeans, BinDiffsAvgs, DeltaVsMean, DeltaVsMeanNames, BinAssignment
 %    to predict the Bin's difference from the Bin's mean.
 %
 
+assert(NBins>PolyDegree,'The number of bins must exceed the polynomial degree.');
+if NBins<=PolyDegree+1
+    warning('Cannot test regression hypotheses because DFE==0; increase NBins or decrease PolyDegree for Ho testing.');
+end
+
 sTempName = UniqueVarname(Trials,'Bin');
 
 % Label the bin for each trial, separately for each subject, congruence, & n of targets:
