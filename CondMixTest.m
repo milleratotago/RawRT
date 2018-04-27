@@ -84,10 +84,6 @@ function [outResultTable, outDVNames, SearchResultsCntrlUni, SearchResultsExptlU
     % into suggested parameter values for the distributions that are being fit.
     
     % Make a table to hold the main results.
-    % Note: outResultTable already exists and has codes for CondSpecs
-    % CntrlUniNames = NumberedNames('CntrlUni',NParmsCntrlUni);
-    % ExptlUniNames = NumberedNames('ExptlUni',NParmsExptlUni);
-    % MixNames = ['EffectP' NumberedNames('CntrlMix',NParmsCntrlMix) NumberedNames('ExptlMix',NParmsExptlMix)];
     CntrlUniNames = strcat('CntrlUni_',CntrlUni{1}.ParmNames(1:NParmsCntrlUni)');
     ExptlUniNames = strcat('ExptlUni_',ExptlUni{1}.ParmNames(1:NParmsExptlUni)');
     MixNames = ['EffectP' strcat('CntrlMix_',CntrlMix{1}.ParmNames(1:NParmsCntrlMix)') strcat('ExptlMix_',ExptlMix{1}.ParmNames(1:NParmsExptlMix)')];
@@ -168,8 +164,6 @@ function [outResultTable, outDVNames, SearchResultsCntrlUni, SearchResultsExptlU
             end % i2
         end % i1
         SearchResultsMix.(MixNames{1}) = 1 - SearchResultsMix.(MixNames{1});  % Because the model parameter is the first probability which is PrEffectAbsent.
-        %SearchResults.MixLnLik{iCond} = TotalMixML;
-        %SearchResults.MixParmsEnd{iCond} = TotalMixParmsEnd;
         
         [BestMixML, I] = max(TotalMixML(:));
         [CntrlMixMaxi, ExptlMixMaxi, MaxpI] = ind2sub(size(TotalMixML),I);
@@ -220,8 +214,6 @@ function [outResultTable, outDVNames, SearchResultsCntrlUni, SearchResultsExptlU
         for ii=1:numel(UniBestParms)
             outResultTable.(DVnames{ii})(iCond) = UniBestParms(ii);
         end
-%         SearchResultsLnLik(SRrow) = LnLik;
-%         SearchParmsEnd() = cell2mat(ParmsEnd);
     end
     
 end % CondMixTest

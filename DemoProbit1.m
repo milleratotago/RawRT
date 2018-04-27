@@ -1,4 +1,5 @@
 %% ********* Demo of Probit analysis: YN or mAFC task
+% This file is named DemoProbit1.m to distinguish it from Cupid's DemoProbit
 
 %% Preliminary reminder of how Cupid works:
 
