@@ -67,3 +67,10 @@ CondMeans(AllResults2,'r','Trty')
 Condttest(AllResults2,'r','','Trty')
 
 
+%% Demo of function CondBootstrap, III.
+% Bootstrap maximum-likelihood parameter estimation
+% This demo also shows how to call an external function
+% to compute the starting parameter values for each maximum likelihood fit fit.
+nBootSamples = 10;  % Probably you would want a lot more for any real analysis.
+sEval = 'CondFitDist(OneSample,''RT1'',{''SubNo'' ''Trty''},ExGauMn(200,20,100),''StartParms'',@LC2008EGStartParms)';
+AllResults2 = CondBootstrap(Trials,{'SubNo','Trty'},sEval,nBootSamples);

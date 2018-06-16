@@ -7,9 +7,14 @@ function Trials = ReadTrialsTable(SubList,FNamePat,varargin)
 %      Example: FNamePat='M1701-%03d.txt' will generate file names like M1701-001.txt,  M1701-012.txt,  M1701-103.txt
 %               for subject numbers 1-999.
 %
-% Optional input variables are all passed to MATLAB's readtable function. E.g.:
+% Optional input variables:
+%   'AddSubNo' : Add a subject number variable
+%
+% Other optional input variables are all passed to MATLAB's readtable function. E.g.:
 %  'ReadVariableNames',true: First line of each file has the variable names.
 %  'HeaderLines',N: Number of header lines to skip at the beginning of each file.
+
+[AddSubNo, varargin] = ExtractNamei('AddSubNo',varargin);
 
 Trials = table;
 nSubs = 0;
@@ -19,6 +24,9 @@ for iSub=SubList
     fileName = sprintf(FNamePat,iSub);
     try
         T1 = readtable(fileName,varargin{:}); % 'ReadVariableNames',true,'HeaderLines',NHeaderLines);
+        if AddSubNo
+            T1.SubNo = iSub*ones(height(T1),1);
+        end
     catch
         fprintf('Unable to read data for subject %d.\n',iSub);
     end

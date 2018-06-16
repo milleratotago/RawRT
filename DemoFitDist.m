@@ -50,3 +50,21 @@ fprintf('\n');
 % call CondFitDist separately for each condition, with the appropriate Dist1 parameters for each one.
 % Just use the 'Include' option as in this example to select out the right data to fit with each
 % set of starting parameters.
+
+%% You can use a separate function to adjust the starting parameter values for each fit.
+fprintf('Estimating ex-Gaussian parameters by MLE with adjusted starting parameter values...');
+Dist1 = ExGauMn(200,20,100);
+ExGaussFitMLE = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1,'StartParms',@LC2008EGStartParms);
+fprintf('\n');
+
+
+% Additional tips:
+% For each combination of conditions, CondFitDist calls a parameter estimation routine in Cupid,
+% and that routine in turn calls MATLAB's fminsearch. This is important to know because fminsearch
+% accepts various optional control values, and you may want to change these control values
+% depending on your particular application.  You can set new control values like this:
+%   Dist1 = Weibull(200,3,100);
+%   Dist1.SearchOptions.MaxFunEvals = 500;
+% This works because Dist1.SearchOptions is a set of control values initialized by MATLAB's optimset
+% function, and you can change these default values to anything you want.  Cupid distributions
+% pass their control value settings (e.g., Dist1.SearchOptions) to fminsearch when they call it.

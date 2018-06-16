@@ -3,6 +3,12 @@ function [outResultTable, outDVNames] = CondFitDist(inTable,sDVs,CondSpecs,DistO
 % the best fit to the observed values of sDVs.
 %
 % varargin options:
+%
+%   'StartParms',Fn
+%      If this parameter is specified, the function Fn(X) should accept a vector
+%      of observed values as input, and it should return a vector of the parameter values
+%      at which to start the search.
+%
 %   Include/Exclude options passed through.
 %
 % If the DefaultParmCodes are not to be used (see Cupid), then DistObj.ParmCodes
@@ -10,6 +16,7 @@ function [outResultTable, outDVNames] = CondFitDist(inTable,sDVs,CondSpecs,DistO
 
 [sFitType, varargin] = ExtractNameVali('FitType','MLE',varargin);
 [NChiSqBins, varargin] = ExtractNameVali('NChiSqBins','-10',varargin);
+[StartParmFn, varargin] = ExtractNameVali('StartParms','-10',varargin);
 % assert(numel(varargin)==0,['Unprocessed arguments: ' strjoin(varargin)]);  % Allow arguments to pass through.
 
 FitOptions = {'MLE' 'Moments' 'ChiSquareBins' 'Percentiles'};
@@ -17,19 +24,19 @@ FitPos = find(strcmpi(sFitType,FitOptions));
 if numel(FitPos)>0
     switch FitPos(1)
         case 1
-            NPassThru = 1; % DistObj
-            [outResultTable, outDVNames1] = CondFunsOfDVs(inTable,sDVs,CondSpecs,@FitDistMLE,varargin{:},'NPassThru',NPassThru,DistObj);
+            NPassThru = 2; % DistObj, StartParmFn
+            [outResultTable, outDVNames1] = CondFunsOfDVs(inTable,sDVs,CondSpecs,@FitDistMLE,varargin{:},'NPassThru',NPassThru,DistObj,StartParmFn);
         case 2
-            NPassThru = 1; % DistObj
-            [outResultTable, outDVNames1] = CondFunsOfDVs(inTable,sDVs,CondSpecs,@FitDistMoments,varargin{:},'NPassThru',NPassThru,DistObj);
+            NPassThru = 2; % DistObj, StartParmFn
+            [outResultTable, outDVNames1] = CondFunsOfDVs(inTable,sDVs,CondSpecs,@FitDistMoments,varargin{:},'NPassThru',NPassThru,DistObj,StartParmFn);
         case 3
             assert(NChiSqBins>2,'Must specify NChiSqBins>2 to compute ChiSquareBins fits.');
             BinMax = DistObj.MakeBinSet(NChiSqBins,false);
-            NPassThru = 2; % DistObj, BinMax
-            [outResultTable, outDVNames1] = CondFunsOfDVs(inTable,sDVs,CondSpecs,@FitDistChiSquareBins,varargin{:},'NPassThru',NPassThru,DistObj,BinMax);
+            NPassThru = 3; % DistObj, StartParmFn, BinMax
+            [outResultTable, outDVNames1] = CondFunsOfDVs(inTable,sDVs,CondSpecs,@FitDistChiSquareBins,varargin{:},'NPassThru',NPassThru,DistObj,StartParmFn,BinMax);
         case 4
-            NPassThru = 1; % DistObj
-            [outResultTable, outDVNames1] = CondFunsOfDVs(inTable,sDVs,CondSpecs,@FitDistPercentiles,varargin{:},'NPassThru',NPassThru,DistObj);
+            NPassThru = 2; % DistObj, StartParmFn
+            [outResultTable, outDVNames1] = CondFunsOfDVs(inTable,sDVs,CondSpecs,@FitDistPercentiles,varargin{:},'NPassThru',NPassThru,DistObj,StartParmFn);
     end
 else
     warning('Unrecognized fitting sFitType.  Options are:');
@@ -56,42 +63,77 @@ outResultTable.(outDVNames1{1}) = [];
 end
 
 
-function out = FitDistMLE(inDVs,DistObj)
-HoldParms = DistObj.ParmValues;  % Save and later restore parameter values so that each data set is fit with the same starting parameter values.
+function out = FitDistMLE(inDVs,DistObj,StartParmFn)
+if numel(inDVs)==0
+    warning('No data: Unable to estimate parameters.');
+end
+UseFn =  isa(StartParmFn, 'function_handle');
+if UseFn
+    NewParms = StartParmFn(inDVs);
+    DistObj.ResetParms(NewParms);
+else
+    HoldParms = DistObj.ParmValues;  % Save and later restore parameter values so that each data set is fit with the same starting parameter values.
+end
 DistObj.EstML(inDVs);
 Best = -DistObj.LnLikelihood(inDVs);
 out = [DistObj.ParmValues Best]; % List of parameter values plus final maximum fit score
-DistObj.ResetParms(HoldParms);   % Restore original parameter values
+if ~UseFn
+    DistObj.ResetParms(HoldParms);   % Restore original parameter values
+end
 end
 
 
-function out = FitDistMoments(inDVs,DistObj)
-HoldParms = DistObj.ParmValues;
+function out = FitDistMoments(inDVs,DistObj,StartParmFn)
+UseFn =  isa(StartParmFn, 'function_handle');
+if UseFn
+    NewParms = StartParmFn(inDVs);
+    DistObj.ResetParms(NewParms);
+else
+    HoldParms = DistObj.ParmValues;  % Save and later restore parameter values so that each data set is fit with the same starting parameter values.
+end
 ObsMoments = DistObj.MomentsFromScores(inDVs);
 DistObj.EstMom(ObsMoments);
 Best = DistObj.MomentError(ObsMoments);
 out = [DistObj.ParmValues Best];
-DistObj.ResetParms(HoldParms);
+if ~UseFn
+    DistObj.ResetParms(HoldParms);   % Restore original parameter values
+end
 end
 
 
-function out = FitDistChiSquareBins(inDVs,DistObj,BinMax)
-HoldParms = DistObj.ParmValues;
+function out = FitDistChiSquareBins(inDVs,DistObj,StartParmFn,BinMax)
+UseFn =  isa(StartParmFn, 'function_handle');
+if UseFn
+    NewParms = StartParmFn(inDVs);
+    DistObj.ResetParms(NewParms);
+else
+    HoldParms = DistObj.ParmValues;  % Save and later restore parameter values so that each data set is fit with the same starting parameter values.
+end
 BrainDeadHistc=histc(inDVs,BinMax);
 BinProbs = BrainDeadHistc(1:numel(BinMax))/numel(inDVs);
 DistObj.EstChiSq(BinMax,BinProbs);
 Best = DistObj.GofFChiSq(BinMax,BinProbs);
 out = [DistObj.ParmValues Best];
-DistObj.ResetParms(HoldParms);
+if ~UseFn
+    DistObj.ResetParms(HoldParms);   % Restore original parameter values
+end
 end
 
 
-function out = FitDistPercentiles(inDVs,DistObj)
-HoldParms = DistObj.ParmValues;
+function out = FitDistPercentiles(inDVs,DistObj,StartParmFn)
+UseFn =  isa(StartParmFn, 'function_handle');
+if UseFn
+    NewParms = StartParmFn(inDVs);
+    DistObj.ResetParms(NewParms);
+else
+    HoldParms = DistObj.ParmValues;  % Save and later restore parameter values so that each data set is fit with the same starting parameter values.
+end
 [ObsPrctiles, TargetCDFs] = DistObj.PercentilesFromScores(inDVs);
 DistObj.EstPctile(ObsPrctiles,TargetCDFs);
 Best = DistObj.PercentileError(ObsPrctiles,TargetCDFs);
 out = [DistObj.ParmValues Best];
-DistObj.ResetParms(HoldParms);
+if ~UseFn
+    DistObj.ResetParms(HoldParms);   % Restore original parameter values
+end
 end
 
