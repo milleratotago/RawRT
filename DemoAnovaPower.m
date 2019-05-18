@@ -1,5 +1,7 @@
 %% This file demonstrates how to compute power for ANOVA designs.
 %
+% To use AnovaPower, you also need Cupid available at https://github.com/milleratotago/Cupid
+%
 % To compute power, you need to know all of the following (hypothetical values
 % of these quantities were simply invented for the examples in this file):
 %
@@ -32,7 +34,7 @@
 %    Two options are provided for specifying error terms.
 %       setPowerWithSigmas: Use this if you can estimate the sigmas directly.
 %            In the future I hope to be provide more information about how to estimate sigmas.
-%            these values; for now, I can only recommend trying various values and checking the
+%            For now, I can only recommend that you try various values and checking the
 %            Avg[MS] columns that you get in the simulations.  The idea is to pick sigmas
 %            for the S, AS, BS, etc that give you Avg[MS] comparable to those you have
 %            found in previous experiments with the same design & number of subjects.

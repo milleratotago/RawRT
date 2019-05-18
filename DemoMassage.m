@@ -31,9 +31,13 @@ RankDescribe = CondDescribe(Trials,'RankofRT',{'SubNo','Cond'})
 
 %% Compute the rank of each trial relative to the other trials from the same subject and condition as a proportion 0-1.
 Trials.RankPropofRT = CondRankProp(Trials,'RT',{'SubNo','Cond'});
-% You might use these RankProp, for example, to exclude trials in the top and bottom 10%.
-
 RankPropDescribe = CondDescribe(Trials,'RankPropofRT',{'SubNo','Cond'})
+% You might use these RankProp, for example, to exclude trials in the top and bottom 10%.
+% You can also use it for a median split:
+Trials.MdnSplit = nan(height(Trials),1);       % Initialize this to nan (in case some trials are not used, e.g. errors)
+Trials.MdnSplit(Trials.RankPropofRT<=.5) = 1;  % Trials with RTs <= median
+Trials.MdnSplit(Trials.RankPropofRT>.5) = 2;   % Trials with RTs >  median
+
 
 
 %% Split the trials from the same subject and condition into subgroups.

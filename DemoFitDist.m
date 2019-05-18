@@ -21,42 +21,117 @@ Trials.RTOK = true(height(Trials),1);  % Mark the trials as all OK for the analy
 % you will need to work with the desired distribution to find some parameters
 % that are in the right ball-park for your data (see Cupid documentation).
 
+%% Example 1:
+
 fprintf('Estimating ex-Gaussian parameters by MLE...');
 Dist1 = ExGauMn(200,20,100);
+tic
 ExGaussFitMLE = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1);
 fprintf('\n');
+toc
+
+% With this example, fminsearch probably complains:
+%    Exiting: Maximum number of function evaluations has been exceeded
+% and it recommends that you increase MaxFunEvals.
+% Example 2 shows how to do that (and to change other search options too).
+
+%% Example 2: Redo example 1 with revised search options.
+
+fprintf('Estimating ex-Gaussian parameters again with revised search options...');
+
+% Each Cupid distribution object (e.g., Dist1) has its own set of
+% fminsearch search options, set by default to fminsearch's defaults.
+% One way to revise these is to create a new set of search options,
+% change any defaults you want, and assign it.  For example,
+% here is a new set of search options:
+mySearchOptions = optimset;  % Generate the default set.
+mySearchOptions.MaxFunEvals = 30000;  % Change several options.
+mySearchOptions.MaxIter = 30000;
+mySearchOptions.TolFun = 1.0e-03; 
+mySearchOptions.TolX = 1.0e-03; 
+
+Dist1.SearchOptions = mySearchOptions;  % Change Dist1's default options to your preferred set.
+
+% Instead, you could just change the options directly, with commands like this:
+%   Dist1.SearchOptions.MaxIter = 30000;
+% but I will re-use mySearchOptions throughout this demo file.
+
+% Rerunning the search with these new option will be faster (due to looser tolerances),
+% and fminsearch will not complain that it fails to converge.
+tic
+ExGaussFitMLE = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1);
+fprintf('\n');
+toc
+
+%% Example 3:
 
 fprintf('Estimating RNGamma parameters by method of moments...');
 Dist1 = RNGamma(100,.1);
+Dist1.SearchOptions = mySearchOptions;  % For the same reason as before.
 RNGammaFitMom = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1,'Method','Moments');
 fprintf('\n');
 
+%% Example 4:
+
 fprintf('Estimating Normal parameters by method of percentiles...');
 Dist1 = Normal(500,50);
-NormalFitPrctiles = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1,'Method','Percentiles');
+Dist1.SearchOptions = mySearchOptions;  % For the same reason as before.
+NormalFitPrctiles = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1,'Method','Percentiles','Pctiles',.1:.2:.9);
 fprintf('\n');
+
+%% Example 5:
 
 fprintf('Estimating Weibull parameters by minimium ChiSquare with 5 bins...');
 Dist1 = Weibull(200,3,100);
+Dist1.SearchOptions = mySearchOptions;  % For the same reason as before.
 WeibullFitChiSq = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1,'Method','ChiSquareBins','NChiSqBins',5);
 fprintf('\n');
 
+%% Example 6:
+
 % Fitting this distribution is quite a lot slower, so only fit for one subject:
+tic
 fprintf('Estimating ExWald parameters by method of percentiles (this is slow)...');
 Dist1 = ExWaldMSM(200,20,100);
-ExWaldFitPctiles = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1,'Method','Percentiles','Include',Trials.SubNo==1);
+Dist1.SearchOptions = mySearchOptions;  % For the same reason as before.
+ExWaldFitPctiles = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1,'Method','Percentiles','Pctiles',.1:.2:.9,'Include',Trials.SubNo==1);
 fprintf('\n');
-% Note: If you need different starting parameters for different subjects and/or conditions, you must
-% call CondFitDist separately for each condition, with the appropriate Dist1 parameters for each one.
+toc
+
+%% Example 7: Multiple searches with different starting points for each search
+
+% Note: If you need different starting parameters for different subjects and/or conditions, you might want
+% to call CondFitDist separately for each condition, with the appropriate Dist1 parameters for each one.
 % Just use the 'Include' option as in this example to select out the right data to fit with each
-% set of starting parameters.
+% set of starting parameters.  Alternatively, you can use a separate function to compute the starting
+% values for each fit, as is illustrated next.
 
 %% You can use a separate function to adjust the starting parameter values for each fit.
 fprintf('Estimating ex-Gaussian parameters by MLE with adjusted starting parameter values...');
 Dist1 = ExGauMn(200,20,100);
+Dist1.SearchOptions = mySearchOptions;  % For the same reason as before.
 ExGaussFitMLE = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1,'StartParms',@LC2008EGStartParms);
 fprintf('\n');
 
+%% Example 8: Special-purpose routine for maximum-likelihood fits of ex-Gaussian and ex-Wald RT distributions.
+% There is a special routine CondFitEGorEWML designed to fit ex-Gaussian or ex-Wald RT distributions.
+
+% You could use it with either of these two distributions. The demo uses ExGauMn because it is faster.
+Dist1 = ExGauMn(200,20,100);        % The starting parameters are never actually used,
+% Dist1 = ExWaldMSM(200,20,100);    % so you don't need to pick good ones for your data.
+
+Dist1.SearchOptions = mySearchOptions;  % For the same reason as before.
+
+% CondFitEGorEWML starts fminsearch several times for each data set, as controlled
+% by the following parameter (see CondFitEGorEWML.m for further info).
+% Of course the final result is determined by whichever fminsearch found the
+% parameters with the highest likelihood.
+VarianceProportionInEx = .1:.1:.9;  % Start 9 different fminsearch runs with the exponential component
+                                    % contributing the corresponding proportion of the total variance
+
+ExGaussFitMLE2 = CondFitEGorEWML(Trials,'RT',{'SubNo' 'Cond'},Dist1,VarianceProportionInEx);
+
+%% The end
 
 % Additional tips:
 % For each combination of conditions, CondFitDist calls a parameter estimation routine in Cupid,

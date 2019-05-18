@@ -1,7 +1,7 @@
 function [CDFs, CDFsNames, figout] = CondCDFs(Trials, DVs, CondSpecs, VincentSpecs, Prctiles, varargin)
 % Compute & optionally plot the CDF of the indicated DV at the indicated Prctile points (0-1),
 %  separately for each combination of conditions indicated by CondSpecs.
-% In addition, compute Vincentized averages across the labels shown in VincentSpecs (e.g., SubNo).
+% In addition, if VincentSpecs is not empty, compute Vincentized averages across the labels shown in VincentSpecs (e.g., SubNo).
 % The vertical axis is cumulative probability (0-1) and the horizontal axis is the value of the DV.
 % If 2+ DVs are listed, a separate figure is made for each DV.
 % CondSpecs is a string or cell array containing up to 3 strings.
@@ -68,7 +68,13 @@ end;
 
 for iDV=1:NDVs
     [PrctVals, PrctNames] = CondPrctiles(Trials,DVs{iDV},[CondSpecs VincentSpecs],Prctiles);
-    [Vctiles, VctNames] = CondMeans(PrctVals,PrctNames,CondSpecs);
+    if numel(VincentSpecs)>0
+        [Vctiles, VctNames] = CondMeans(PrctVals,PrctNames,CondSpecs);
+    else
+        % No vincentizing
+        Vctiles = PrctVals;
+        VctNames = PrctNames;
+    end
     CDFs{iDV} = Vctiles;
     CDFNames{iDV} = VctNames;
     if WantPlot

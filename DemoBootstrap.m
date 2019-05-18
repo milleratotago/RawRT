@@ -9,7 +9,7 @@ Trials = DemoData('DemoPaired');
 
 
 %%  Demo of function CondBootsample.
-% For this example, we will bootstrapp a correlation.
+% For this example, we will bootstrap a correlation.
 nBootSamples = 10;  % Obviously you would want a lot more for any real analysis.
 AllResults = table;  % Make an empty table to accumulate the results in.
 for iSample=1:nBootSamples
@@ -74,3 +74,23 @@ Condttest(AllResults2,'r','','Trty')
 nBootSamples = 10;  % Probably you would want a lot more for any real analysis.
 sEval = 'CondFitDist(OneSample,''RT1'',{''SubNo'' ''Trty''},ExGauMn(200,20,100),''StartParms'',@LC2008EGStartParms)';
 AllResults2 = CondBootstrap(Trials,{'SubNo','Trty'},sEval,nBootSamples);
+
+
+%%  Demo of function CondSubsample.
+% For this example, we will look at the distribution of the correlation based on subsamples of half of the trials.
+nSubSamples = 10;  % Obviously you would want a lot more for any real analysis.
+AllResults = table;  % Make an empty table to accumulate the results in.
+for iSample=1:nSubSamples
+    % Generate samples one by one.
+    OneSample = CondSubsample(Trials,0.5,{'SubNo','Trty'});
+    % For each sample, compute the desired analysis.
+    OneResult = CondCorrs(OneSample,'RT1','RT3',{'SubNo','Trty'});
+    OneResult.iSample = iSample*ones(height(OneResult),1);  % Save the sample number in case you want it.
+    AllResults = [AllResults; OneResult];  % Accumulate the results across samples.
+end
+% AllResults now has the correlations for all Substrap samples,
+% and we might for example average those:
+CondMeans(AllResults,'r',{'SubNo','Trty'})
+% or see how many were significant:
+CondNs(AllResults,{'SubNo','Trty'},'Include',AllResults.p<.05)
+

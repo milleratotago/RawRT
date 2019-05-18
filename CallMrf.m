@@ -2,14 +2,17 @@ function sysResult = CallMrf(Trials,sDV,BetweenFacs,WithinFacs,SubjectSpec,sOutF
 % Call the MrF program (mrfb.exe or mrfub.exe) to compute ANOVAs on the variables listed in sDV.
 % For more information on this program, see:   https://web.psy.otago.ac.nz/miller/progs/mrf.zip
 
-% NEWJEFF: mrfub has a shorter limit on the length of a factor name.  Should probably check for that or update mrfub.
-
 % Required input arguments:
 %   sDV: Name(s) of the DV(s) to be analyzed.  If 2+ DVs are specified (in a cell array), ANOVAs are run separately for each one.
 %   BetweenFacs: A cell array, possibly empty, listing the names of the variables coding the between-Ss factors.
 %   WithinFacs : A cell array, possibly empty, listing the names of the variables coding the within-Ss factors.
 %   SubjectSpec: The name of the variable indicating the subject identifier--these must be distinct, unique identifiers for each S.
 %   sOutFileName: The name used for the output files (i.e., *.RPT, *.LGF, *.FPR, and *.FBK).
+
+% Limitations:
+%   o Factor names (both between- & within factors) are limited to at most 12 characters.
+%     (The upper limit may be even smaller with unequal group sizes where mrfub is called.)
+%   o Between-Ss factors must be coded with sequential integers with no gaps (e.g., 1,2,3 or 3,4,5 or etc, but not 1,3,4)
 
 % Optional input arguments (that can appear in any order):
 %   Include/Exclude selection criteria, as usual (passed thru to MaybeSelect).
@@ -89,7 +92,8 @@ assert(numel(varargin)==0,['Unprocessed arguments: ' strjoin(varargin)]);
 % **************** Process between-Ss factor(s) & Subjects factor:
 
 if NBetweenFacs > 0
-    [NGroups, ~, BetweenLevels, ~, ~, GroupSpecIndices] = CondList(Trials,BetweenFacs);
+    [NGroups, ~, BetweenLevels, LevelLabels, ~, GroupSpecIndices] = CondList(Trials,BetweenFacs);  % NEWJEFF: Group spec indices is 1,2,...
+    % This does not work properly with RowsWhichSatisfy if the between-Ss factor levels are anything other than 1,2,...
 else
     NGroups = 1;
 end
@@ -124,7 +128,7 @@ if NGroups>1
     for iGroup=1:NGroups-1
         for jGroup=iGroup+1:NGroups
             iSet = intersect(GroupList{iGroup},GroupList{jGroup});
-            assert(numel(iSet)==0,['ERROR: Subjects ' num2str(iSet') ' belongs to more than one group.']);
+            assert(numel(iSet)==0,['ERROR: Subject(s) ' num2str(iSet') ' belong(s) to more than one group.']);
         end
     end
 end

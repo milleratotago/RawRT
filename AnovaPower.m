@@ -308,10 +308,15 @@ classdef AnovaPower < handle
             obj.SrcWithSub = false(obj.NSources,1);
             for jSource = 1:numel(obj.RandomSources)
                 iSource = obj.RandomSources(jSource);
-                if obj.tbl.Sigma(iSource)>0
-                    obj.RVerr{iSource} = Normal(0,obj.tbl.Sigma(iSource));
-                else
-                    obj.RVerr{iSource} = ConstantC(0);
+                try
+                    if obj.tbl.Sigma(iSource)>0
+                        obj.RVerr{iSource} = Normal(0,obj.tbl.Sigma(iSource));
+                    else
+                        obj.RVerr{iSource} = ConstantC(0);
+                    end
+                catch ME
+                   disp('To use AnovaPower, you also need Cupid available at https://github.com/milleratotago/Cupid');
+                   rethrow(ME);
                 end
                 obj.ErrConstraints{iSource} = obj.FindWithinComponents(iSource);
                 obj.ErrSrcName{iSource} = UniqueVarname(obj.SimTrials,obj.tbl.Properties.RowNames{iSource});

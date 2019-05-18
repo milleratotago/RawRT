@@ -4,12 +4,22 @@
 %   * Condttest2
 %   * Condsignrank
 %   * Condranksum
+%   * CondMedianBTS
+%   * CondMeansTrimmed
 
 %% CondSummaryScores Demo.
 
 Trials = DemoData('DemoCondSummaryScores');
 % Illustrative experiment recording firing rates of single cells;
 % see description in DemoData.m.
+
+% Bootstrap-correct medians
+nBoot = 10;
+MdnBTS = CondMediansBTS(Trials,'Stim',{'Bird','Cell'},nBoot);
+
+% Trimmed means
+TrimPct = 20;  % Trim 10% from each end and compute mean of remaining 80%.
+MeansTrimmed = CondMeansTrimmed(Trials,'Stim',{'Bird','Cell'},TrimPct);
 
 % Do paired t-tests to see whether the stimulus influenced the firing rate of each cell:
 PairedTs = Condttest(Trials,'Baseline','Stim',{'Bird','Cell'});
@@ -29,4 +39,5 @@ mean(Corrs.r)
 % Is it better to use a Wilcoxon nonparametric test?
 WilcoxRS = Condranksum(Trials,'inTable.Baseline','inTable.Stim',{'Bird','Cell'});
 WilcoxSR = Condsignrank(Trials,'Baseline','Stim',{'Bird','Cell'});
+
 

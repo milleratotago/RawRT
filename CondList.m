@@ -10,7 +10,7 @@ function [NConds, NDistinguished, Sizes, Values, CondCombos, Indices] = CondList
 %   NConds: The total number of combinations.
 %   NDistinguished: The number of variables on which distinctions are made.
 %   Sizes: A 1-D array listing the number of different values found for each of the to-be-distinguished variables.
-%   Values: 
+%   Values: A cell array with one cell per CondSpec.  Each cell holds an array of the different values on that CondSpec.
 %   CondCombos: A 2-D array of (NConds, NDistinguished).
 %               CondCombos(iCond,:) is a list of the values of the distinguished variable associated with each combination.
 %               That is, values of CondCombos(:,iDistinguished) are actual values in Trials of each variable.

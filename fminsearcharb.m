@@ -48,10 +48,10 @@ if (nargin<5)
     parmcodes = blanks(numel(x0parms));
     parmcodes(:) = 'r';
 else
-    %     SizeOfx0parms = size(x0parms)
-    %     SizeOfparmcodes = size(parmcodes)
-    % a = x0parms
-    % s = parmcodes
+%        SizeOfx0parms = size(x0parms)
+%        SizeOfparmcodes = size(parmcodes)
+%    a = x0parms
+%    s = parmcodes
     assert(isequal(passedstruc.allxsize,size(parmcodes)),'sizes of x0parms and parmcodes must match');
 end
 parmcodes = lower(parmcodes);   % ensure all parmcode characters are lower case
@@ -82,8 +82,7 @@ passedstruc.x0reals = parmstorealsFn(x0parms,passedstruc.parmcodes);
 % Select out the starting values of the subset of parameters be adjusted by fminsearch
 x0realstosearch = passedstruc.x0reals(passedstruc.adjaddresses);
 
-% now we can call fminsearch, but with our own
-% intra-objective function.
+% now we can call fminsearch, but with our own intra-objective function.
 [xreals,fval,exitflag,output] = fminsearch(@intrafun,x0realstosearch,fmsoptions,passedstruc);
 
 yreals = reloadfullparms(xreals,passedstruc);
@@ -140,6 +139,7 @@ for iIntegerParm = 1:NIntegerParms
         %       fprintf('Trying %0.4f with LowerInt = %d and UpperInt = %d\n',RealApprox,LowerInt,UpperInt);
         ParmSetTable{iStoredEntry}(passedstruc.intaddresses(iIntegerParm)) = LowerInt;
         ParmSetTable{iStoredEntry+NEntriesStoredSoFar}(passedstruc.intaddresses(iIntegerParm)) = UpperInt;
+        
         % The (previous) weight of the stored entry is now divided across the upper/lower int cases.
         % The following line looks backwards at first, but it is correct because the
         % weight of each integer _increases_ when it is closer to the RealApprox

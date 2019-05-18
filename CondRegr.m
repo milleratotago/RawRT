@@ -33,11 +33,7 @@ outResultTable.(outDVNames1{1}) = [];
 end
 
 function out = Fit(inTable,sModel)
-try
 lm = fitlm(inTable,sModel);
-catch
-    pause  % NEWJEFF
-end
 % Note that the output is a list of several component values:
 if lm.DFE>0
     testval = coefTest(lm);
