@@ -7,9 +7,9 @@ function [outTrials, outArg] = MaybeSelect(inTrials,varargin)
 % ExcludeIndictor: 0 = include, 1 = exclude
 % If both are specified, the trial must be indicated as include on both.
 
-[IncludeIndicators, outArg] = ExtractNameVali('Include',ones(height(inTrials),1),varargin);
+[IncludeIndicators, outArg] = ExtractNameVali({'Include','IncludeOnly'},ones(height(inTrials),1),varargin);
 
-[ExcludeIndicators, outArg] = ExtractNameVali('Exclude',zeros(height(inTrials),1),outArg);
+[ExcludeIndicators, outArg] = ExtractNameVali({'Exclude','ExcludeOnly'},zeros(height(inTrials),1),outArg);
 
 NRowsInTrials = height(inTrials);
 NInclude = numel(IncludeIndicators);

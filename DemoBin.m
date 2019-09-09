@@ -78,8 +78,11 @@ NBins = 4;       % Use 4 bins.
 PolyDegree = 2;  % Fit effect size versus mean RT as a 2nd order polynomial.
 CompareLevels = [1 2]; % Measure condition effect as condition 2 minus condition 1.
 
+sBinningVar = 'RT';
+sDV = 'RT';
+
 [RTBinMeans, RTBinDiffsAvgs, RTDeltaVsMean, RTDeltaVsMeanNames, BinAssignments] = ...
- CondDelta(Trials,'RT','RT','SubNo','Cond',CompareLevels,NBins,PolyDegree,'Include',Trials.RTOK);
+ CondDelta(Trials,sBinningVar,sDV,'SubNo','Cond',CompareLevels,NBins,PolyDegree,'Include',Trials.RTOK);
 
 % The outputs of CondDelta can be used in many ways.  Here are some examples:
 

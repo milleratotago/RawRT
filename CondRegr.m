@@ -35,7 +35,7 @@ end
 function out = Fit(inTable,sModel)
 lm = fitlm(inTable,sModel);
 % Note that the output is a list of several component values:
-if lm.DFE>0
+if (lm.DFE>0) % && (std(lm.
     testval = coefTest(lm);
 else
     % Can't do the test if DFE=0 but may want estimates

@@ -14,9 +14,9 @@ function [outIndices, outCondLabels] = SubTableIndices(Trials,CondSpecs,varargin
 % Optional arguments:
 %   Include/Exclude selection criteria.
 
-[IncludeIndicators, outArg] = ExtractNameVali('Include',ones(height(Trials),1),varargin);
+[IncludeIndicators, outArg] = ExtractNameVali({'Include','IncludeOnly'},ones(height(Trials),1),varargin);
 
-[ExcludeIndicators, outArg] = ExtractNameVali('Exclude',zeros(height(Trials),1),outArg);
+[ExcludeIndicators, outArg] = ExtractNameVali({'Exclude','ExcludeOnly'},zeros(height(Trials),1),outArg);
 
 if numel(CondSpecs)==0
     % Include all selected trials in a single condition.

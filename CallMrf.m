@@ -12,7 +12,7 @@ function sysResult = CallMrf(Trials,sDV,BetweenFacs,WithinFacs,SubjectSpec,sOutF
 % Limitations:
 %   o Factor names (both between- & within factors) are limited to at most 12 characters.
 %     (The upper limit may be even smaller with unequal group sizes where mrfub is called.)
-%   o Between-Ss factors must be coded with sequential integers with no gaps (e.g., 1,2,3 or 3,4,5 or etc, but not 1,3,4)
+%   o Between-Ss factors must be coded with sequential integers, starting from 1, with no gaps (i.e., 1,2,3...)
 
 % Optional input arguments (that can appear in any order):
 %   Include/Exclude selection criteria, as usual (passed thru to MaybeSelect).
@@ -26,6 +26,7 @@ function sysResult = CallMrf(Trials,sDV,BetweenFacs,WithinFacs,SubjectSpec,sOutF
 %   'Path',sPath: A path that is to be added to the DOS path.  This indicates where mrfb.exe and mrfub.exe are found.
 %                 The path should include backslashes but no final backslash, e.g.: 'Path','C:\binw\jpas'
 %                 The path is removed from the DOS path at the end of this function.
+%   'Latex':  Also write some information in Latex format as supported by FPRtools.
 
 % Notes for programmers about the DOS path:  NewJeff
 %  By default, the location of this *.m file is added to the path, so both exe files
@@ -54,6 +55,7 @@ function sysResult = CallMrf(Trials,sDV,BetweenFacs,WithinFacs,SubjectSpec,sOutF
 [KillFPR, varargin] = ExtractNamei('KillFPR',varargin);
 [NoEdit,  varargin] = ExtractNamei({'NoEdit','NoLoad'},varargin);
 [NotepadLines, varargin] = ExtractNameVali('Notepad','',varargin); %#ok<ASGLU>
+[Latex, varargin] = ExtractNamei({'Latex','WriteLatex'},varargin);
 
 [NoNotepad, varargin] = ExtractNamei('NoNotepad',varargin);
 if ~NoNotepad
@@ -243,6 +245,10 @@ if numel(MyPath)>0
     setenv('PATH', oldpath);
 end
 
+% Add Latex information if required.
+if Latex
+    FPRtools.AddLatex(sOutFileName);  % '.FPR' added in FPRtools.
+end
 
 % **************** Display the MrF output file in the MATLAB editor window:
 if ~NoEdit
@@ -264,7 +270,7 @@ if KillFPR && exist(FPRfName, 'file')==2
     delete(FPRfName);
 end
 
-% **************** Nest functions start here ****************
+% **************** Nested functions start here ****************
 
     function WriteBetweenFac
         fprintf(LGFfile,'%d Between Ss Factor(s)\n',NBetweenFacs);

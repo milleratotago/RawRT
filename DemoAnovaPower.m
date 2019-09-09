@@ -132,7 +132,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -180,7 +180,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -235,7 +235,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -277,7 +277,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -320,7 +320,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -371,7 +371,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -415,7 +415,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -461,7 +461,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -508,7 +508,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithSigmas(TrueMeans,TrueSigmas,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
@@ -569,7 +569,7 @@ anvpwr = AnovaPower(BetweenFacs,BetweenLevels,WithinFacs,WithinLevels,SubName,NS
 anvpwr.setPowerWithMSes(TrueMeans,MSes,alpha)
 anvpwr.Report;
 
-if exist('NSims') & NSims>0
+if exist('NSims') && (NSims>0)
     anvpwr.InitSims;
     for iSim=1:NSims
         anvpwr.SimulateOne;
