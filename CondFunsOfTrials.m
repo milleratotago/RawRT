@@ -31,7 +31,7 @@ NConds = height(outResultTable);
 % Make names for computed columns in output table:
 outDVNames = cell(1,NFuns);
 for iFun=1:NFuns
-    outDVNames{iFun} = UniqueVarname(outResultTable,func2str(FunHandleCellArray{iFun}));
+    outDVNames{iFun} = UniqueVarname(outResultTable,func2strmod(FunHandleCellArray{iFun}));
 end
 
 NaNIndices = [];  % Keep a list of any rows that have all NaNs.

@@ -3,6 +3,7 @@ function [outIndices, outCondLabels] = SubTableIndices(Trials,CondSpecs,varargin
 % Find the indicated subset of trials for each combination of the conditions indicated by CondSpecs.
 %
 % NConds subsets will be found, where NConds is the number of different combinations of CondSpecs.
+% Note that some subsets may be empty if not all combinations of CondSpecs are present.
 %
 % outIndices is a cell array of NConds cells. Each cell contains a 1-dimensional
 %  array of integers indicating the row outIndices within the input array Trials
@@ -19,7 +20,7 @@ function [outIndices, outCondLabels] = SubTableIndices(Trials,CondSpecs,varargin
 [ExcludeIndicators, outArg] = ExtractNameVali({'Exclude','ExcludeOnly'},zeros(height(Trials),1),outArg);
 
 if numel(CondSpecs)==0
-    % Include all selected trials in a single condition.
+    % Include all selected trials in a single condition called 'All'.
     NConds = 1;
     outIndices = cell(NConds,1);
     outIndices{1} = find(IncludeIndicators&~ExcludeIndicators);

@@ -69,8 +69,8 @@ else
     
     BootstrapMeans=[mean(BS_PSE_SK), mean(BS_Sigma_SK), mean(BS_DL_SK)];
     BootstrapSEMs=[std(BS_PSE_SK), std(BS_Sigma_SK), std(BS_DL_SK)];
-    BootstrapCIs=[prctile(BS_PSE_SK, 2.5), prctile(BS_Sigma_SK, 2.5),prctile(BS_DL_SK, 2.5);...
-        prctile(BS_PSE_SK, 97.5), prctile(BS_Sigma_SK, 97.5),prctile(BS_DL_SK, 97.5)];
+    BootstrapCIs=[prctileTies(BS_PSE_SK, 2.5), prctileTies(BS_Sigma_SK, 2.5),prctileTies(BS_DL_SK, 2.5);...
+        prctileTies(BS_PSE_SK, 97.5), prctileTies(BS_Sigma_SK, 97.5),prctileTies(BS_DL_SK, 97.5)];
     
     %% Output
     %RelFreq = [fi; fiMono]

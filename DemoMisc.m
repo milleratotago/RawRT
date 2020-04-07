@@ -6,6 +6,7 @@
 %   * Condranksum
 %   * CondMedianBTS
 %   * CondMeansTrimmed
+%   * CondCenMoment
 
 %% CondSummaryScores Demo.
 
@@ -40,4 +41,6 @@ mean(Corrs.r)
 WilcoxRS = Condranksum(Trials,'inTable.Baseline','inTable.Stim',{'Bird','Cell'});
 WilcoxSR = Condsignrank(Trials,'Baseline','Stim',{'Bird','Cell'});
 
-
+% CondCenMoment
+NMoment = 3;
+[CenMomTbl, CenMomNames, CenMom3] = CondCenMoment(Trials,'Stim',{'Bird'},NMoment);

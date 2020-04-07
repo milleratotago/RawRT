@@ -109,7 +109,7 @@ else
 end
 
 if numel(sYLabel)==0
-   sFunc = func2str(ThisFun);
+   sFunc = func2strmod(ThisFun);
    sYLabel = [sFunc '(' yDV ')'];
 end
 

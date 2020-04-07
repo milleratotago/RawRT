@@ -31,7 +31,7 @@ function Trials = ReadTrialsTable(SubList,FNamePat,varargin)
                 Trials = [Trials; T1]; %#ok<AGROW>
                 nSubs = nSubs + 1;
             catch
-                fprintf('Mismatching variable names for subject %d.\n',iSub);
+                fprintf('Mismatching variables (names or formats) for subject %d.\n',iSub);
                 fprintf('Previous variable names:');
                 fprintf(' %s',Trials.Properties.VariableNames{:});
                 fprintf('\n');

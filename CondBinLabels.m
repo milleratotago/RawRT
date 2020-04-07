@@ -1,5 +1,7 @@
 function [outIndicators, outBinTops] = CondBinLabels(inTrials,sDV,CondSpecs,NBins,varargin)
 % Produce a list of output indicators in the range [1-NBins] for all trials in inTrials (NaN indicates unused).
+% The bin assignment indicates whether inTrials.sDV is in the smallest bin (1), 2nd smallest (2), etc.
+% There are approximately equal numbers of trials in all bins.
 
 % Inputs:
 %

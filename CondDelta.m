@@ -1,6 +1,9 @@
 function [DVBinMeans, BinDiffsAvgs, DeltaVsMean, DeltaVsMeanNames, BinAssignments] ...
  = CondDelta(Trials,sRT,sDV,CondSpecs,sDiffSpec,LevelNums,NBins,PolyDegree,varargin)
 % Delta plot analysis to see how the size of a condition effect changes depending on the size of the RT.
+% Throughout this function, "RT" refers to the variable that is used to assign trials to bins,
+%   and DV refers to the variable used to index the size of the effect.  Often these are the same, but as
+%   an example where they are different, one could bin trials according to RT & then measure effect size on PC.
 %
 % Required arguments (see DemoBin for an example):
 %   Trials: data table
@@ -58,7 +61,7 @@ Trials.(sTempName) = BinAssignments;
 AvgWeights = zeros(1,numel(unique(RTBinMeans.(sDiffSpec))));
 AvgWeights(LevelNums) = 0.5;
 [RTBinAvgs, RTBinAvgsNames] = CondWeightedSum(RTBinMeans,RTBinMeanNames,[CondSpecs {sTempName}],sDiffSpec,AvgWeights);
-sAvgsName = UniqueVarname(RTBinAvgs,[sRT 'BinAvgs']);
+sAvgsName = UniqueVarname(RTBinAvgs,[sRT 'Mn']);
 RTBinAvgs.Properties.VariableNames{end} = sAvgsName;
 
 DiffWeights = zeros(size(AvgWeights));
@@ -68,8 +71,14 @@ DiffWeights(LevelNums(2)) = 1;
 
 % Assemble averages and differences into a single table
 BinDiffsAvgs = RTBinAvgs;
-sDiffsName = UniqueVarname(BinDiffsAvgs,[sDV 'BinDiffs']);
+sDiffsName = UniqueVarname(BinDiffsAvgs,[sDV 'Diff']);
 BinDiffsAvgs.(sDiffsName) = DVBinDiffs.(DVBinDiffsNames{1});
+BinDiffsAvgs.([sRT 'Mn1']) = RTBinMeans.(sRT)(RTBinMeans.(sDiffSpec)==LevelNums(1));
+BinDiffsAvgs.([sRT 'Mn2']) = RTBinMeans.(sRT)(RTBinMeans.(sDiffSpec)==LevelNums(2));
+if ~strcmp(sRT,sDV)
+    BinDiffsAvgs.([sDV 'Mn1']) = DVBinMeans.(sDV)(DVBinMeans.(sDiffSpec)==LevelNums(1));
+    BinDiffsAvgs.([sDV 'Mn2']) = DVBinMeans.(sDV)(DVBinMeans.(sDiffSpec)==LevelNums(2));
+end
 
 [DeltaVsMean, DeltaVsMeanNames] = CondRegr(BinDiffsAvgs,sAvgsName,sDiffsName,CondSpecs,PolyDegree);
 

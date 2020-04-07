@@ -108,7 +108,7 @@ if Plot == true
     title('Test of the Race Model Inequality','FontSize',16)
     xlabel('Time t (ms)','FontSize',14)
     ylabel('Probability','FontSize',14)
-    legend('G_x(t)','G_y(t)','G_z(t)','G_x(t)+G_y(t)',4)
+    legend('G_x(t)','G_y(t)','G_z(t)','G_x(t)+G_y(t)')
 end
 end
 
@@ -116,7 +116,7 @@ end
 function OK=check(U1,P1,G)
 
 OK=true;
-for t=(U1-2):(U1+2);
+for t=(U1-2):(U1+2)
     if (G(t)>P1) && (G(t-1)==0)
         OK=false;
         return
@@ -130,7 +130,7 @@ function Tp = GetPercentile(P,G,tmax)
 
 % Determine minimum of |G(Tp(i))-P(i)|
 np=length(P);
-for i=1:np;
+for i=1:np
     cc=100;
     for t=1:tmax
         if abs(G(t)-P(i)) < cc
@@ -197,17 +197,17 @@ for t=1:U(1)
     G(t)=0;
 end
 
-for t=U(1):U(2);
+for t=U(1):U(2)
     G(t)=(R(1)/2+(R(1)+R(2))/2*(t-U(1))/(U(2)-U(1)))/n;
 end
 
-for i=2:(k-1);
-    for t=U(i):U(i+1);
+for i=2:(k-1)
+    for t=U(i):U(i+1)
         G(t)=(C(i-1)+R(i)/2+(R(i)+R(i+1))/2*(t-U(i))/(U(i+1)-U(i)))/n;
     end
 end
 
-for t=U(k):maximum;
+for t=U(k):maximum
     G(t)=1;
 end
 

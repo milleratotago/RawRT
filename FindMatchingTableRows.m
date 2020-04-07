@@ -1,4 +1,4 @@
-function Rows = FindMatchingTableRows(Tbl,VarNames,VarVals)
+function Rows = FindMatchingTableRows(Tbl,VarNames,VarVals,varargin)
     % Find the numbers of the rows in Tbl with the values
     % given in VarVals on the variables given in VarNames.
     %
@@ -8,8 +8,24 @@ function Rows = FindMatchingTableRows(Tbl,VarNames,VarVals)
     %   values of the VarNames variables.
     % Rows is a vector with the numbers of the Tbl rows having the desired
     %   values on the indicated variables.
+    %
+    % varargin should be a boolean; if true, check to make sure exactly one row matches.
+
+    switch numel(varargin)
+        case 0
+            InsistOn1Match = false;
+        case 1
+            a = varargin{1};
+            if islogical(a)
+                InsistOn1Match = a;
+            else
+                BadArgs;
+            end
+        otherwise
+            BadArgs;
+    end
     
-    Tol = .001;
+    Tol = 0.001;
     
     % k = numel(VarVals);
     % matching = true(height(Tbl),1);
@@ -24,6 +40,23 @@ function Rows = FindMatchingTableRows(Tbl,VarNames,VarVals)
     match=ismembertol(Tbl{:,VarNames},VarVals,Tol,'byrows',1);
     Rows = find(match);
     % assert(all(Rows==Rows2),'Row mismatch');
+
+    if InsistOn1Match
+        switch numel(Rows)
+            case 0
+                error('No matching table row.');
+            case 1
+                % OK to proceed
+            otherwise
+                disp('Found rows:');
+                Rows
+                error('Multiple matching table rows.');
+        end
+    end
+
+    function BadArgs
+            error('Unrecognized argument(s)');
+    end
     
 end
 

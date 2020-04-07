@@ -18,6 +18,10 @@ NWanted = numel(PrctilesWanted);
 
 Prctiles = nan(1,NWanted);
 
+if length(InputVector) < NWanted
+    return;
+end
+
 [UniqueVals, Counts, CumCounts] = UniqueCounts( InputVector );
 
 NInputs = CumCounts(end);
@@ -25,7 +29,7 @@ NInputs = CumCounts(end);
 CumPcts = (CumCounts - Counts/2) * 100 / NInputs;
 
 if (PrctilesWanted(1)<CumPcts(1))||(PrctilesWanted(end)>CumPcts(end))
-    disp('Not enough distinct values to compute requested percentiles!');
+    % NEWJEFF: KILLED THE ERROR MESSAGE FOR SIMULATIONS disp('Not enough distinct values to compute requested percentiles!');
     return;
 end
 

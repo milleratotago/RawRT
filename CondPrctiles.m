@@ -4,8 +4,8 @@ function [outResultTable, outDVNames] = CondPrctiles(inTrials,sDVs,CondSpecs,Prc
 % varargin options:
 %   Include/Exclude options passed through.
 
-%MATLAB prctile function handles ties differently (incorrectly, in my view):
-%[outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,@prctile,varargin{:},'NPassThru',1,Prctiles);
+% MATLAB prctile function handles ties differently (incorrectly, in my view):
+% [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,@prctile,varargin{:},'NPassThru',1,Prctiles);
 
 % This version handles ties as described by Ulrich, Miller, & Schroeter (2007):
 [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,@prctileTies,varargin{:},'NPassThru',1,Prctiles);

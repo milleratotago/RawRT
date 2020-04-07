@@ -8,14 +8,18 @@ function outVals = CondRankProp(inTrials,sDV,CondSpecs,varargin)
 %   CondSpecs : Conditions to be kept separate when ranking (e.g., subject, task, etc)
 %
 % varargin options:
-%   'AvgTies' to average the ranks of tied scores (e.g., give 3.5 for tied scores at ranks 3 & 4).
+%   'Adjust' to subtract 1/2N from all outputs so that the outputs go from 0.5/N to (N-0.5)/N
+%     instead of 1 to N.
+%   'NoAvgTies' to rank only unique scores, so the maximum rank may be less than the total number of scores.
+%     The default behavior is to average the ranks of tied scores (e.g., give 3.5 for tied scores at ranks 3 & 4).
 %   Include/Exclude options passed through.
 %
 % Outputs:
 %
 %   outVals : List indicating rank for each trial.
 
-[AvgTies, varargin] = ExtractNamei('AvgTies',varargin);
+[NoAvgTies, varargin] = ExtractNamei('NoAvgTies',varargin);
+[Adjust, varargin] = ExtractNamei('Adjust',varargin);
 
 NinTrials = height(inTrials);
 outVals = NaN(NinTrials,1);
@@ -24,16 +28,21 @@ outVals = NaN(NinTrials,1);
 
 NConds = height(CondLabels);
 
+Adjustment = 0;
+
 for iCond = 1:NConds
     Indices = mySubTableIndices{iCond};
     TheseVals = inTrials.(sDV)(Indices);
     nItems = numel(TheseVals);
-    if AvgTies
+    if Adjust
+       Adjustment = 0.5 / nItems;
+    end
+    if ~NoAvgTies
        rank_vector = tiedrank(TheseVals);
     else
        [~,~,rank_vector] = unique(TheseVals);
     end
-    outVals(Indices) = rank_vector / nItems;
+    outVals(Indices) = rank_vector / nItems - Adjustment;
 end
 
 end

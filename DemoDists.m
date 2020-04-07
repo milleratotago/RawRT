@@ -17,9 +17,9 @@ WantPrctiles = 10:10:90;
 Vincentized = CondMeans(PrctTest, PrctNames,'Cond');
 figure('Name','Vincentized %iles of RT');
 hold on;
-plot(WantPrctiles,Vincentized.RTprctiles(Vincentized.Cond==3,:));
-plot(WantPrctiles,Vincentized.RTprctiles(Vincentized.Cond==2,:));
-plot(WantPrctiles,Vincentized.RTprctiles(Vincentized.Cond==1,:));
+plot(WantPrctiles,Vincentized.RT_prctiles(Vincentized.Cond==3,:));
+plot(WantPrctiles,Vincentized.RT_prctiles(Vincentized.Cond==2,:));
+plot(WantPrctiles,Vincentized.RT_prctiles(Vincentized.Cond==1,:));
 xlabel('Percentile');
 ylabel('RT at percentile');
 legend('Cond 3','Cond 2','Cond 1');
@@ -48,6 +48,6 @@ BinTops = 280:20:420;
 [CountTest, CountNames] = CondHistcounts(Trials,'RT',{'SubNo','Cond'},BinTops,'Include',Trials.RTOK);
 MeanCounts = CondMeans(CountTest, CountNames,'Cond');
 figure;
-plot(BinTops(2:end),MeanCounts.RThistcounts(MeanCounts.Cond==1,:));
+plot(BinTops(2:end),MeanCounts.RT_histcounts_1(MeanCounts.Cond==1,:));
 
 % end

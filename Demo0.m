@@ -54,7 +54,7 @@ CondPlot(Trials,'RT',{'SubNo','Cond'},'Labels',Labels,'XEdge',.02);  % Plot the 
 
 CondPlot(Trials,'RT',{'SubNo','Cond','Blk'});    % Plot the mean RT for each subject in each condition in each block
                                                  % You may want to expand this picture.
-
+ 
 % You can also plot summary functions other than the mean.
 % Here are two examples with MATLAB's built-in median and std functions.
 CondPlot(Trials,'RT','Cond','Function',@median);   % Plot the median RT in each condition.
