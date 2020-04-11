@@ -8,13 +8,12 @@ function [TooLo, TooHi] = CondExcludeVSJ(inTrials,sDV,CondSpecs,Method,varargin)
     %  initial 0-2: none, 'SD', or 'SD' and 'SD2', as needed by the specific method called (see class VSJmnRTs)
     %    remainder: Include/Exclude options passed through.
     %
-    % Output vectors TooLo & TooHi:
+    % Logical output vectors TooLo & TooHi:
     %   1 = Excluded
-    %   0 = considered but not excluded
-    %  -1 = not considered
+    %   0 = considered but not excluded, or not considered at all
     
-    TooLo = -1*ones(height(inTrials),1);
-    TooHi = -1*ones(height(inTrials),1);
+    TooLo = false(height(inTrials),1);
+    TooHi = false(height(inTrials),1);
     
     nVSJargs = VSJmnRTs.Props(Method).NParms;
     VSJargs = varargin(1:nVSJargs);

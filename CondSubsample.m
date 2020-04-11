@@ -1,4 +1,4 @@
-function [outResultTable, Selected] = CondSubsample(inTrials,SampleSize,CondSpecs,varargin)
+function [outResultTable, outSelectedIndices] = CondSubsample(inTrials,SampleSize,CondSpecs,varargin)
 % Make an output table with a random sample of trials from each condition indicated by CondSpecs.
 % The number of rows in the sample (NSample) is controlled by SampleSize as follows (let NTotal be the number of
 %   trials in each condition):
@@ -11,6 +11,7 @@ function [outResultTable, Selected] = CondSubsample(inTrials,SampleSize,CondSpec
 mySubTableIndices = SubTableIndices(inTrials,CondSpecs,varargin{:});
 
 outResultTable = table;
+outSelectedIndices = zeros(0,0);
 
 NConds = numel(mySubTableIndices);
 
@@ -24,7 +25,7 @@ else
    error('Illegal SampleSize parameter.');
 end
 
-Selected = false(height(inTrials),1);
+% Selected = false(height(inTrials),1);
 
 for iCond = 1:NConds
     RelevantIndices = mySubTableIndices{iCond};
@@ -40,8 +41,9 @@ for iCond = 1:NConds
     end
     SelectedIndices = RandomRelevant(1:NSample);
     OneSubTable = inTrials(SelectedIndices,:);
-    Selected(SelectedIndices) = true;
+%     Selected(SelectedIndices) = true;
     outResultTable = [outResultTable; OneSubTable(1:NSample,:)]; %#ok<AGROW>
+    outSelectedIndices = [outSelectedIndices; SelectedIndices]; %#ok<AGROW>
 end
 
 end
