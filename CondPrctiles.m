@@ -4,6 +4,11 @@ function [outResultTable, outDVNames] = CondPrctiles(inTrials,sDVs,CondSpecs,Prc
 % varargin options:
 %   Include/Exclude options passed through.
 
+if max(Prctiles<1)
+   warning('Adjusting percentiles from 0-1 to 0-100');
+   Prctiles = 100 * Prctiles;
+end
+
 % MATLAB prctile function handles ties differently (incorrectly, in my view):
 % [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,@prctile,varargin{:},'NPassThru',1,Prctiles);
 
