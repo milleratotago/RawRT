@@ -1,7 +1,7 @@
 % The goals of this demo are to illustrate how to:
 %   * label trials according to whether the RT is in the fastest bin, 2nd fastest, etc
 %   * compute & analyze conditional accuracy functions
-%   * compute & analyze "delta plots"
+%   * compute & analyze "delta plots" (2 methods)
 
 %% Generate some simulated data for a demonstration.
 % Normally, you would start your script by reading in your real data.
@@ -111,4 +111,15 @@ mean(RTDeltaVsMean.Slope2)
  CondDelta(Trials,'RT','Cor','SubNo','Cond',CompareLevels,NBins,PolyDegree,'Include',Trials.RTOK);
 CallMrf(PCBinMeans,'Cor',{},{'Bin','Cond'},'SubNo','DemoBinDPPC1');
 
+%% CondBinMeans
+% Use the method of Ratcliff (1979) to compute bin averages.
+
+BinMeansRT = CondBinMeans(Trials,'RT','RT',{'SubNo','Cond'},NBins);
+BinMeansPC = CondBinMeans(Trials,'RT','Cor',{'SubNo','Cond'},NBins);
+
+%% CondDelta2
+% Use the method of Ratcliff (1979) to compute bin averages.
+
+[RTBinMeans, RTBinDiffsAvgs, RTDeltaVsMean, RTDeltaVsMeanNames] = ...
+ CondDelta2(Trials,sBinningVar,sDV,'SubNo','Cond',CompareLevels,NBins,PolyDegree,'Include',Trials.RTOK);
 

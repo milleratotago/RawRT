@@ -1,31 +1,45 @@
 function outtbl = stackvec(intbl,sDV)
-% sDV is a string name of column of intbl that contains a vector of N elements for each row.
-% outtbl has N times as many rows.
-% in outtbl, the sDV column has a single number.
-% outtbl also has an additional column called sDV_N with values of 1, 2, 3, .. N
-% indicating each sDV's position within the intbl vector.
-
-%[sDV, NDVs] = EnsureCell(sDV);
-%sDV = sDV{1};
-
-tmp = intbl.(sDV);  % hold the value of vec
-intbl.(sDV) = [];
-
-N = size(tmp,2);
-
-outtbl = table;
-for iRow=1:height(intbl)
-    for j=1:N
-        outtbl = [outtbl; intbl(iRow,:)];
+    % Split up table variables that are N-element arrays into N rows each.
+    %
+    % sDV is a string name or cell array indicating the column(s) of intbl
+    %  that contain vectors of N elements for each row
+    %  (all vectors must contain the same number of elements).
+    % outtbl has N times as many rows.
+    % in outtbl, each sDV column has a single number.
+    % outtbl also has an additional column called [sDV{1} '_N'] with values of
+    % 1, 2, 3, .. N indicating each outtbl row's position within the intbl vector.
+    
+    [sDV, NDVs] = EnsureCell(sDV);
+    
+    % Store the vectors that are to be stacked and remove them from the input table.
+    % Will put them back later as stacked scalers.
+    tmp = cell(NDVs,1);
+    for iDV=1:NDVs
+        tmp{iDV} = intbl.(sDV{iDV});  % hold the value of vec
+        intbl.(sDV{iDV}) = [];
     end
-end
-
-sDVlbl = [sDV '_N'];
-labels = (1:N);
-labels = repmat(labels,1,height(intbl));
-outtbl.(sDVlbl) = labels';
-
-tmp = tmp';  % reorder so that vector element changes faster than row.
-outtbl.(sDV) = tmp(:);
-
+    
+    VecLen = size(tmp{1},2);  % How many elements in each vector.
+    
+    % Start the output table by making VecLen copies of each
+    % row to replicate the _other_ table variables.
+    outtbl = table;
+    for iRow=1:height(intbl)
+        for j=1:VecLen
+            outtbl = [outtbl; intbl(iRow,:)]; %#ok<AGROW>
+        end
+    end
+    
+    % Make a variable to label the output rows with the vector positions.
+    sDVlbl = [sDV{1} '_N'];
+    labels = (1:VecLen);
+    labels = repmat(labels,1,height(intbl));
+    outtbl.(sDVlbl) = labels';
+    
+    % Copy the stored vector values into the table
+    for iDV = 1:NDVs
+        tmp2 = tmp{iDV}';  % reorder so that vector element changes faster than row.
+        outtbl.(sDV{iDV}) = tmp2(:);
+    end
+    
 end

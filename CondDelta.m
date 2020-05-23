@@ -69,7 +69,9 @@ DiffWeights(LevelNums(1)) = -1;
 DiffWeights(LevelNums(2)) = 1;
 [DVBinDiffs, DVBinDiffsNames] = CondWeightedSum(DVBinMeans,DVBinMeanNames,[CondSpecs {sTempName}],sDiffSpec,DiffWeights);
 
-% Assemble averages and differences into a single table
+% Assemble averages and differences into a single BinDiffsAvgs table with columns:
+% SubNo, CondSpecs, etc.
+% Bin, sRTMn, sRTDiff, sRTMn1, sRTMn2, and maybe sDVMn1 & sDVMn2
 BinDiffsAvgs = RTBinAvgs;
 sDiffsName = UniqueVarname(BinDiffsAvgs,[sDV 'Diff']);
 BinDiffsAvgs.(sDiffsName) = DVBinDiffs.(DVBinDiffsNames{1});

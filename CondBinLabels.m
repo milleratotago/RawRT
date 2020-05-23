@@ -44,7 +44,11 @@ for iCond = 1:NConds
     TheseVals = inTrials.(sDV)(Indices) + Jitter(Indices);
     nItems = numel(TheseVals);
 
-    assert(nItems>=NBins,['ERROR: Cannot distinguish ' num2str(NBins) ' bins with only ' num2str(nItems) ' trials.']);
+    if nItems<NBins
+        disp(['Cannot distinguish ' num2str(NBins) ' bins with only ' num2str(nItems) ' trials.']);
+        pause
+        error('Must halt');
+    end
 
     % Find the bin cutoffs for this set of values:
     TheseVals = sort(TheseVals);
