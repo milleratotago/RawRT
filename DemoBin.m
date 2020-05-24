@@ -114,8 +114,8 @@ CallMrf(PCBinMeans,'Cor',{},{'Bin','Cond'},'SubNo','DemoBinDPPC1');
 %% CondBinMeans
 % Use the method of Ratcliff (1979) to compute bin averages.
 
-BinMeansRT = CondBinMeans(Trials,'RT','RT',{'SubNo','Cond'},NBins);
-BinMeansPC = CondBinMeans(Trials,'RT','Cor',{'SubNo','Cond'},NBins);
+BinMeansRT = CondBinMeans(Trials,'RT',{'SubNo','Cond'},NBins);
+BinMeansPC = CondBinMeans(Trials,{'RT','Cor'},{'SubNo','Cond'},NBins);
 
 %% CondDelta2
 % Use the method of Ratcliff (1979) to compute bin averages.

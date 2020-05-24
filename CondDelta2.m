@@ -47,8 +47,14 @@ function [DVBinMeans, BinDiffsAvgs, DeltaVsMean, DeltaVsMeanNames] ...
         warning('Cannot test regression hypotheses because DFE==0; increase NBins or decrease PolyDegree for Ho testing.');
     end
     
+    DifferentDVs = ~strcmp(sRT,sDV);
+
     % Compute the mean for each combination of CondSpecs, sDiffSpec, and Bin for both sorting variable (RT) & dependent variable (DV)
-    [DVBinMeans, sBinLabel] = CondBinMeans(Trials,sRT,sDV,[CondSpecs {sDiffSpec}],NBins,varargin{:});
+    if DifferentDVs
+        [DVBinMeans, sBinLabel] = CondBinMeans(Trials,{sRT,sDV},[CondSpecs {sDiffSpec}],NBins,varargin{:});
+    else
+        [DVBinMeans, sBinLabel] = CondBinMeans(Trials,sRT,[CondSpecs {sDiffSpec}],NBins,varargin{:});
+    end
     
     [RTBinAvgs, RTBinAvgsNames] = CondMeans(DVBinMeans,sRT,[CondSpecs{:} {sBinLabel}]);
     sAvgsName = RTBinAvgsNames{end};
@@ -63,7 +69,7 @@ function [DVBinMeans, BinDiffsAvgs, DeltaVsMean, DeltaVsMeanNames] ...
     BinDiffsAvgs.(sDiffsName) = DVBinDiffs.(sDV);
     BinDiffsAvgs.([sRT 'Mn1']) = DVBinMeans.(sRT)(DVBinMeans.(sDiffSpec)==LevelNums(1));
     BinDiffsAvgs.([sRT 'Mn2']) = DVBinMeans.(sRT)(DVBinMeans.(sDiffSpec)==LevelNums(2));
-    if ~strcmp(sRT,sDV)
+    if DifferentDVs
         BinDiffsAvgs.([sDV 'Mn1']) = DVBinMeans.(sDV)(DVBinMeans.(sDiffSpec)==LevelNums(1));
         BinDiffsAvgs.([sDV 'Mn2']) = DVBinMeans.(sDV)(DVBinMeans.(sDiffSpec)==LevelNums(2));
     end
