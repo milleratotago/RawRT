@@ -63,6 +63,28 @@ ExGaussFitMLE = CondFitDist(Trials,'RT',{'SubNo' 'Cond'},Dist1);
 fprintf('\n');
 toc
 
+%% Derive predicted values:
+
+% The table ExGaussFitMLE now has the ML parameter estimates for each subject/condition.
+% You can now get predicted values based on these estimates as shown in the following
+% example where the predicted mean and SD are computed:
+
+% Make new table variables to hold the predicted values:
+ExGaussFitMLE.PredictedMean = nan(height(ExGaussFitMLE),1);
+ExGaussFitMLE.PredictedSD = nan(height(ExGaussFitMLE),1);
+
+% For each subject/condition combination, make a predicted distribution
+% with the fitted parameter values & compute its mean and SD:
+for iRow=1:height(ExGaussFitMLE)
+    onemu = ExGaussFitMLE.mu(iRow);
+    onesigma = ExGaussFitMLE.sigma(iRow);
+    oneexmean = ExGaussFitMLE.exmean(iRow);
+    oneDist = ExGauMn(onemu,onesigma,oneexmean);  % ExGauMn is of course the same as the distribution that we fit.
+    ExGaussFitMLE.PredictedMean(iRow) = oneDist.Mean;
+    ExGaussFitMLE.PredictedSD(iRow) = oneDist.SD;
+end
+
+
 %% Example 3:
 
 fprintf('Estimating RNGamma parameters by method of moments...');
@@ -131,6 +153,27 @@ VarianceProportionInEx = .1:.1:.9;  % Start 9 different fminsearch runs with the
 
 ExGaussFitMLE2 = CondFitEGorEWML(Trials,'RT',{'SubNo' 'Cond'},Dist1,VarianceProportionInEx);
 
+%% Example 9: Specify your own starting values (possibly multiple starting points) for each condition separately.
+%  This is effectively the same as Example 8 but uses a more general technique of specifying starting points.
+%  With this technique you could compute (multiple) starting points for each data set however you want,
+%  which would be especially useful with other distributions than EG or EW.
+
+% You could use it with either of these two distributions. The demo uses ExGauMn because it is faster.
+Dist1 = ExGauMn(200,20,100);        % The starting parameters are never actually used,
+% Dist1 = ExWaldMSM(200,20,100);    % so you don't need to pick good ones for your data.
+
+Dist1.SearchOptions = mySearchOptions;  % For the same reason as before.
+
+VarianceProportionInEx = .1:.1:.9;  % Start 9 different fminsearch runs with the exponential component
+                                    % contributing the corresponding proportion of the total variance
+
+CondSpecs = {'SubNo' 'Cond'};
+
+% The following function computes some plausible starting ex-GauMn parameter values separately for each condition
+starting_parms = StartingParmsEGEW(Trials,'RT',CondSpecs,VarianceProportionInEx,'Include',Trials.RTOK);
+
+[outResultTable, outDVNames] = CondFitDist2(Trials,'RT',CondSpecs,Dist1,'StartingParms',starting_parms,'Include',Trials.RTOK)
+ 
 %% The end
 
 % Additional tips:
