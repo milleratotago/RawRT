@@ -76,13 +76,13 @@ sEval = 'CondFitDist(OneSample,''RT1'',{''SubNo'' ''Trty''},ExGauMn(200,20,100),
 AllResults2 = CondBootstrap(Trials,{'SubNo','Trty'},sEval,nBootSamples);
 
 
-%%  Demo of function CondSubsample.
+%%  Demo of function CondSubsampleT.
 % For this example, we will look at the distribution of the correlation based on subsamples of half of the trials.
 nSubSamples = 10;  % Obviously you would want a lot more for any real analysis.
 AllResults = table;  % Make an empty table to accumulate the results in.
 for iSample=1:nSubSamples
     % Generate samples one by one.
-    OneSample = CondSubsample(Trials,0.5,{'SubNo','Trty'});
+    OneSample = CondSubsampleT(Trials,0.5,{'SubNo','Trty'});
     % For each sample, compute the desired analysis.
     OneResult = CondCorrs(OneSample,'RT1','RT3',{'SubNo','Trty'});
     OneResult.iSample = iSample*ones(height(OneResult),1);  % Save the sample number in case you want it.

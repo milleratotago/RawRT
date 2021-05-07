@@ -1,6 +1,6 @@
 function Rows = FindMatchingTableRows(Tbl,VarNames,VarVals,varargin)
     % Find the numbers of the rows in Tbl with the values
-    % given in VarVals on the variables given in VarNames.
+    % given in the number vector VarVals on the variables given in VarNames.
     %
     % Tbl is a table with m variables.
     % VarNames is a cell array of strings naming k variables in Tbl.
@@ -25,8 +25,6 @@ function Rows = FindMatchingTableRows(Tbl,VarNames,VarVals,varargin)
             BadArgs;
     end
     
-    Tol = 0.001;
-    
     % k = numel(VarVals);
     % matching = true(height(Tbl),1);
     % for kidx=1:k
@@ -37,7 +35,7 @@ function Rows = FindMatchingTableRows(Tbl,VarNames,VarVals,varargin)
     
     % Alternate method from Matlab Answers: https://au.mathworks.com/matlabcentral/answers/397162
     % 'byrows',1 makes sure that all variables match correspondingly.
-    match=ismembertol(Tbl{:,VarNames},VarVals,Tol,'byrows',1);
+    match=ismembertol(Tbl{:,VarNames},VarVals,'ByRows',true);
     Rows = find(match);
     % assert(all(Rows==Rows2),'Row mismatch');
 

@@ -23,7 +23,9 @@ function Trials = ReadTrialsTable(SubList,FNamePat,varargin)
         % fileName = ['M1701-' SubStr '.txt'];
         fileName = sprintf(FNamePat,iSub);
         try
-            T1 = readtable(fileName,varargin{:}); % 'ReadVariableNames',true,'HeaderLines',NHeaderLines);
+            % Format/auto is used here to ensure that a column with any characters will be treated as all characters.
+            % Without that, MATLAB sometimes thinks columns with mixed digit and alpha characters is numeric and codes the chars as NAN.
+            T1 = readtable(fileName,varargin{:},'Format','auto'); % 'ReadVariableNames',true,'HeaderLines',NHeaderLines);
             if AddSubNo
                 T1.SubNo = iSub*ones(height(T1),1);
             end
@@ -31,7 +33,8 @@ function Trials = ReadTrialsTable(SubList,FNamePat,varargin)
                 Trials = [Trials; T1]; %#ok<AGROW>
                 nSubs = nSubs + 1;
             catch
-                fprintf('Mismatching variables (names or formats) for subject %d.\n',iSub);
+                fprintf('Error appending trials for subject %d.\n',iSub);
+                fprintf('Mismatching variable names or formats for subject %d.\n',iSub);
                 fprintf('Previous variable names:');
                 fprintf(' %s',Trials.Properties.VariableNames{:});
                 fprintf('\n');

@@ -1,5 +1,6 @@
 function [outResultTable, outDVNames] = CondWeightedSum(Trials,sDVs,CondSpecs,CondName,Weights,varargin)
     % For each DV, for each combination defined by CondSpecs, compute a weighted linear function
+    % of the different conditions distinguished within the variable CondName,
     % as specified by weights, averaging across any other (unspecified) dimensions of the Trials dataset.
     %
     % Include/Exclude options passed through to SubTableIndices.
@@ -14,9 +15,9 @@ function [outResultTable, outDVNames] = CondWeightedSum(Trials,sDVs,CondSpecs,Co
     
     [BaseMeanTable, BaseMeanNames] = CondMeans(Trials,sDVs,[CondSpecs(:); {CondName}],varargin{:});
     
-    warning('off', 'MATLAB:table:ModifiedVarnames');
+    warning('off', 'MATLAB:table:ModifiedVarnamesUnstack');
     outResultTable = unstackvec(BaseMeanTable,BaseMeanNames,CondName);
-    warning('on', 'MATLAB:table:ModifiedVarnames');
+    warning('on', 'MATLAB:table:ModifiedVarnamesUnstack');
     NConds = height(outResultTable);
     
     % Make columns to hold contrast values:
