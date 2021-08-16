@@ -6,7 +6,7 @@
 
 % Imagine that each of 20 subjects is tested in 3 conditions.
 FNames  = {'SubNo', 'Cond'};
-FLevels = [   20       3  ];
+FLevels = [   2000       3  ];
 Trials = TrialFrame(FNames,FLevels,'SortBy',{'SubNo','Cond'});
 
 % For each subject and condition, we have an observed value of a chi-square test

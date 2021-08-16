@@ -6,6 +6,15 @@ function [outResultTable, outDVName] = CondMetaChisq(inTrials,sChisqVal,sdfVal,C
     %  resulting from these tests and their associated df's.
     % CondSpecs defines different combinations of conditions whose H0 testing
     %  results are to be meta-analyzed separately.
+    %
+    % Optional argument e.g. 'alpha',0.025 gives significance level for checking proportion
+    % of single results that are significant.
+    % 
+    % Output table has rows for CondSpecs combinations and columns for:
+    %   meta-analysis summaries: 'TtlChisq', 'Ttldf', 'AttainedP', and
+    %   'PrSig' = proportion of individual-test results significant at alpha level
+    
+    [alpha, varargin] = ExtractNameVali('alpha',0.05,varargin);
     
     [mySubTableIndices, outResultTable] = SubTableIndices(inTrials,CondSpecs,varargin{:});
     
@@ -26,9 +35,25 @@ function [outResultTable, outDVName] = CondMetaChisq(inTrials,sChisqVal,sdfVal,C
         outResultTable.TtlChisq(iCond) = TtlChisq;
         outResultTable.Ttldf(iCond) = Ttldf;
         outResultTable.AttainedP(iCond) = AttainedP;
-    end
+        
+        % Get attained p values for individual results and
+        % see what proportion were significant.
+        obschisqs = inTrials.(sChisqVal)(Indices);
+        dfs = inTrials.(sdfVal)(Indices);
+        attainedps = zeros(size(dfs));
+        for i=1:numel(Indices)
+            thisdf = dfs(i);
+            if thisdf ~= old_df
+                chisq.ResetParms(thisdf);
+                old_df = thisdf;
+            end
+            attainedps(i) = 1 - chisq.CDF(obschisqs(i));
+        end
+        outResultTable.PrSig(iCond) = mean(attainedps<alpha);
     
-    outDVName = {'TtlChisq', 'Ttldf', 'AttainedP'};
+    end % for iCond
+    
+    outDVName = {'TtlChisq', 'Ttldf', 'AttainedP', 'PrSig'};
     
 end % CondMetaChisq
 

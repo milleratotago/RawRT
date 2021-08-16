@@ -1,5 +1,8 @@
-%% ********* Demo of Probit analysis: YN or mAFC task
+%% ********* Demo of Probit analysis based on a parametric distribution: YN or mAFC task
+%% See DemoSpearKar for nonparametric Spearman-Karber analyses
+
 % This file is named DemoProbit1.m to distinguish it from Cupid's DemoProbit
+
 
 %% Preliminary reminder of how Cupid works:
 
@@ -13,6 +16,7 @@ a = N.YNProbitLnLikelihood(C,NYes+NNo,NYes);
 
 N.PerturbParms('rr');  % Perturb the parameters and make sure we can recover them.
 N.EstProbitYNML(C,NYes+NNo,NYes,'rr')
+
 
 %% Generate some fake data for the analysis:
 
@@ -34,6 +38,7 @@ NSubs = 5;
 NBlks = 2;
 NStims = 5;
 NTrialsPerBlkStim = 200;  % Don't go too small or you may get empty cells in some analyses.
+
 
 % Generate example data:
 rng('default');  % Parameter can be any positive integer
@@ -73,4 +78,6 @@ ChiSqEsts = CondFitPmetric(Trials,'Stim','Resp',{'SubNo' 'BlkNo'},Dist1,'Fit','C
 
 % Note that you could now perform ANOVA on the estimated parameter values with a command like this:
 % CallMrf(MLEEsts,{'mu','sigma','PSE','DL'},{},{'BlkNo'},'SubNo',['PMetric' ThisTask 'MLE']);
+
+
 

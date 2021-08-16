@@ -6,6 +6,16 @@ function [outResultTable, outDVName] = CondMetaFisher(inTrials,sDV,CondSpecs,var
     %  resulting from these tests.
     % CondSpecs defines different combinations of conditions whose H0 testing
     %  results are to be meta-analyzed separately.
+    %
+    % Optional argument e.g. 'alpha',0.025 gives significance level for checking proportion
+    % of single results that are significant.
+    % 
+    % Output table has rows for CondSpecs combinations and columns for:
+    %   meta-analysis summaries: 'FisherSum', 'Ttldf', 'AttainedP', and
+    %   'PrSig' = proportion of individual-test results significant at alpha level
+    
+    
+    [alpha, varargin] = ExtractNameVali('alpha',0.05,varargin);
     
     [mySubTableIndices, outResultTable] = SubTableIndices(inTrials,CondSpecs,varargin{:});
     
@@ -27,9 +37,10 @@ function [outResultTable, outDVName] = CondMetaFisher(inTrials,sDV,CondSpecs,var
         outResultTable.FisherSum(iCond) = F;
         outResultTable.Ttldf(iCond) = df;
         outResultTable.AttainedP(iCond) = AttainedP;
+        outResultTable.PrSig(iCond) = mean(ps<alpha);
     end
     
-    outDVName = {'FisherSum', 'Ttldf', 'AttainedP'};
+    outDVName = {'FisherSum', 'Ttldf', 'AttainedP', 'PrSig'};
     
 end % CondMetaFisher
 

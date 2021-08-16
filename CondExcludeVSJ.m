@@ -1,7 +1,7 @@
 function [TooLo, TooHi] = CondExcludeVSJ(inTrials,sDV,CondSpecs,Method,varargin)
     % Compute a vector of scores indicating whether each trial in inTrials would be excluded
     % by one of the outlier-exclusion methods considered by Van Selst & Jolicoeur (1994).
-    % Method is an integer 1-6 indicating which of their methods to use, as defined in the class VSJmnRTs.
+    % Method is an integer 1-7 indicating which of their methods to use, as defined in the class VSJmnRTs.
     % sDV is a string name for the DV: only one is allowed.
     %
     % varargin options:
