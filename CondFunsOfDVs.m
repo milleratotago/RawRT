@@ -84,7 +84,7 @@ function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,Fu
     
     OneResult = cell(1,NoutVarsPerFun);  % Make a cell array to hold the output of each function temporarily
     
-    for iCond = 1:NConds   % parfor not allowed here
+    for iCond = 1:NConds   % parfor not allowed here because of OneResult and outResultTable
         OneSubTable = inTrials(mySubTableIndices{iCond},:);
         for iDV=1:NDVs
             OneDV = OneSubTable.(sDVs{iDV});

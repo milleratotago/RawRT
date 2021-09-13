@@ -50,7 +50,7 @@ function [outResultTable, outDVNames] = CondFitDist(inTable,sDVs,CondSpecs,DistO
     
     
     % Break up and relabel the parameter estimates and maximized fit value in the output table.
-    NDVsOut = DistObj.NDistParms + 2;  % Parameters + maximized fit score + exitflag
+    NDVsOut = DistObj.NDistParms + 3;  % Parameters + maximized fit score + exitflag + funcCount
     outDVNames = cell(NDVsOut,1);
     % NEWJEFF: The outDVNames are not correct for derived distributions, eg convolutions.
     %E.g., the initial fields of the Convolution object are 'BasisRV1', 'BasisRV2', 'CDFRelTol', etc.
@@ -58,8 +58,9 @@ function [outResultTable, outDVNames] = CondFitDist(inTable,sDVs,CondSpecs,DistO
         outDVNames{iParm} = UniqueVarname(outResultTable,DistObj.ParmNames{iParm});
         outResultTable.(outDVNames{iParm}) = outResultTable.(outDVNames1{1})(:,iParm);
     end
-    outDVNames{NDVsOut-1} = UniqueVarname(outResultTable,'Best');
-    outDVNames{NDVsOut} = UniqueVarname(outResultTable,'ExitFlag');
+    outDVNames{NDVsOut-2} = UniqueVarname(outResultTable,'Best');
+    outDVNames{NDVsOut-1} = UniqueVarname(outResultTable,'ExitFlag');
+    outDVNames{NDVsOut} = UniqueVarname(outResultTable,'funcCount');
     outResultTable.(outDVNames{NDVsOut-1}) = outResultTable.(outDVNames1{1})(:,NDVsOut-1);
     outResultTable.(outDVNames{NDVsOut}) = outResultTable.(outDVNames1{1})(:,NDVsOut);
     
@@ -80,8 +81,8 @@ function out = FitDistMLE(inDVs,DistObj,StartParmFn)
     else
         HoldParms = DistObj.ParmValues;  % Save and later restore parameter values so that each data set is fit with the same starting parameter values.
     end
-    [~, ~, Best, exitflag] = DistObj.EstML(inDVs);
-    out = [DistObj.ParmValues Best exitflag];
+    [~, ~, Best, exitflag, outstruc] = DistObj.EstML(inDVs);
+    out = [DistObj.ParmValues Best exitflag outstruc.funcCount];
     if ~UseFn
         DistObj.ResetParms(HoldParms);   % Restore original parameter values
     end
@@ -97,8 +98,8 @@ function out = FitDistMoments(inDVs,DistObj,StartParmFn)
         HoldParms = DistObj.ParmValues;  % Save and later restore parameter values so that each data set is fit with the same starting parameter values.
     end
     ObsMoments = DistObj.MomentsFromScores(inDVs);
-    [~, ~, Best, exitflag] = DistObj.EstMom(ObsMoments);
-    out = [DistObj.ParmValues Best exitflag];
+    [~, ~, Best, exitflag, outstruc] = DistObj.EstMom(ObsMoments);
+    out = [DistObj.ParmValues Best exitflag outstruc.funcCount];
     if ~UseFn
         DistObj.ResetParms(HoldParms);   % Restore original parameter values
     end
@@ -115,8 +116,8 @@ function out = FitDistChiSquareBins(inDVs,DistObj,StartParmFn,BinMax)
     end
     BrainDeadHistc=histc(inDVs,BinMax);
     BinProbs = BrainDeadHistc(1:numel(BinMax))/numel(inDVs);
-    [~, ~, Best, exitflag] = DistObj.EstChiSq(BinMax,BinProbs);
-    out = [DistObj.ParmValues Best exitflag];
+    [~, ~, Best, exitflag, outstruc] = DistObj.EstChiSq(BinMax,BinProbs);
+    out = [DistObj.ParmValues Best exitflag outstruc.funcCount];
     if ~UseFn
         DistObj.ResetParms(HoldParms);   % Restore original parameter values
     end
@@ -133,13 +134,13 @@ function out = FitDistPercentiles(inDVs,DistObj,StartParmFn,TargetCDFs)
     end
     ObsPctiles = prctileTies(inDVs,TargetCDFs*100);
     if sum(isnan(ObsPctiles)) == 0  % Check whether all percentiles exist
-        [~, ~, Best, exitflag] = DistObj.EstPctile(ObsPctiles,TargetCDFs);
-        out = [DistObj.ParmValues Best exitflag];
+        [~, ~, Best, exitflag, outstruc] = DistObj.EstPctile(ObsPctiles,TargetCDFs);
+        out = [DistObj.ParmValues Best exitflag outstruc.funcCount];
         if ~UseFn
             DistObj.ResetParms(HoldParms);   % Restore original parameter values
         end
     else  % Some percentiles are missing, so skip estimation & return nans.
-        out = [nan(size(DistObj.ParmValues)) nan nan];
+        out = [nan(size(DistObj.ParmValues)) nan nan nan];
     end
 end
 
