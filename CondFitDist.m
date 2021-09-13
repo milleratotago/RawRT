@@ -61,6 +61,7 @@ function [outResultTable, outDVNames] = CondFitDist(inTable,sDVs,CondSpecs,DistO
     outDVNames{NDVsOut-2} = UniqueVarname(outResultTable,'Best');
     outDVNames{NDVsOut-1} = UniqueVarname(outResultTable,'ExitFlag');
     outDVNames{NDVsOut} = UniqueVarname(outResultTable,'funcCount');
+    outResultTable.(outDVNames{NDVsOut-2}) = outResultTable.(outDVNames1{1})(:,NDVsOut-2);
     outResultTable.(outDVNames{NDVsOut-1}) = outResultTable.(outDVNames1{1})(:,NDVsOut-1);
     outResultTable.(outDVNames{NDVsOut}) = outResultTable.(outDVNames1{1})(:,NDVsOut);
     
