@@ -19,6 +19,7 @@ if DVRows
     outResultTable = table;
     NSummaries = 7;  % N, Mean, StdDev, etc
     for iDV=1:numel(sDVs)
+        inTrials.(sDVs{iDV}) = double(inTrials.(sDVs{iDV})); % @std only works on floating point numbers
         [outResultTable2, outDVNames2] = CondFunsOfDVs(inTrials,sDVs{iDV},CondSpecs,{@mean @std @stderr @median @minNAN4empty @maxNAN4empty},'SaveNaNs',varargin{:});
         outResultTable2 = join(outResultTable1,outResultTable2);
         [outResultTable2.Properties.VariableNames(end-NSummaries+1:end)] = deal({'N', 'Mean', 'StdDev', 'StdErr', 'Median', 'Min', 'Max'});
