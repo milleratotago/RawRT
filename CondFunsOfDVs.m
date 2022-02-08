@@ -1,4 +1,7 @@
 function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,FunHandleCellArray,varargin)
+    % 2022-02-09: This new version will compute in parallel across the different conditions.
+    %    To make that happen, just call CondFunDVs(true) anytime after you start MATLAB and before
+    %    you call CondFunsOfDVs (you have to make this call again after you 'clear all', if you do that).
     % Call each of the functions in FunHandleCellArray on each DV in sDVs for all combinations
     %   of the conditions indicated by CondSpecs.
     % outResultTable has one row for each combination of conditions in CondSpecs.  Its variables are:
@@ -42,9 +45,9 @@ function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,Fu
     end
     
     [outDVNames, varargin] = ExtractNameVali('outDVNames',{},varargin);
-
+    
     [DropOutputs, varargin] = ExtractNameVali('DropOutputs',false(1,NoutVarsPerFun),varargin);
-
+    
     [NPassThru, varargin, FirstPassThruArgPos] = ExtractNameVali('NPassThru',0,varargin);  % Save NPassThru arguments for passing to FunHandle
     if NPassThru>0
         PassThruArgs = varargin(FirstPassThruArgPos:FirstPassThruArgPos+NPassThru-1);
@@ -82,14 +85,51 @@ function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,Fu
         end % for iDV
     end
     
-    OneResult = cell(1,NoutVarsPerFun);  % Make a cell array to hold the output of each function temporarily
-    
-    for iCond = 1:NConds   % parfor not allowed here because of OneResult and outResultTable
+    % Extract the data values that will be used for each function call:
+    OneDV = cell(NConds,NDVs);
+    for iCond=1:NConds
         OneSubTable = inTrials(mySubTableIndices{iCond},:);
         for iDV=1:NDVs
-            OneDV = OneSubTable.(sDVs{iDV});
+            OneDV{iCond,iDV} = OneSubTable.(sDVs{iDV});
+        end
+    end
+    
+    % Find out how many cells each function produces as output (all functions must produce the same number):
+    OneResult = cell(1,NoutVarsPerFun);
+    %     OneSubTable = inTrials(mySubTableIndices{1},:);
+    %     OneDV = OneSubTable.(sDVs{1});
+    [OneResult{:}] = FunHandleCellArray{1}(OneDV{1,1},PassThruArgs{:});
+    NCellsPerFun = numel(OneResult);
+    
+    % Compute all of the function values into HoldResults with parfor or for loop
+    HoldResults = cell(NConds,NDVs,NFuns,NCellsPerFun);
+    WantParallel = CondFunDVsParallel;
+    for iDV=1:NDVs
+        for iFun=1:NFuns
+            thisFun = FunHandleCellArray{iFun};
+            if WantParallel
+                fprintf('p');
+                parfor iCond = 1:NConds
+                    OneResult = cell(1,NCellsPerFun);
+                    [OneResult{:}] = thisFun(OneDV{iCond,iDV},PassThruArgs{:});
+                    HoldResults(iCond,iDV,iFun,:) = OneResult(:);
+                end
+            else
+                fprintf('s');
+                for iCond = 1:NConds
+                    [OneResult{:}] = thisFun(OneDV{iCond,iDV},PassThruArgs{:});
+                    HoldResults(iCond,iDV,iFun,:) = OneResult(:);
+                end
+            end
+        end
+    end
+    fprintf('\n');
+    
+    % Load HoldResults into outResultTable
+    for iCond = 1:NConds
+        for iDV=1:NDVs
             for iFun=1:NFuns
-                [OneResult{:}] = FunHandleCellArray{iFun}(OneDV,PassThruArgs{:});
+                OneResult = HoldResults(iCond,iDV,iFun,:);
                 OneResultToKeep = OneResult(~DropOutputs);
                 for iOutVar=1:min(NoutVarsToKeepPerFun,numel(OneResultToKeep))
                     if iCond==1
@@ -111,3 +151,4 @@ function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,Fu
     outDVNames = outResultTable.Properties.VariableNames(max(NCondSpecs,1)+1:end);
     
 end
+
