@@ -94,6 +94,14 @@ assert(numel(varargin)==0,['Unprocessed arguments: ' strjoin(varargin)]);
 % **************** Process between-Ss factor(s) & Subjects factor:
 
 if NBetweenFacs > 0
+    % Check whether all between factor levels are coded 1:n as required & error if not:
+    for iFac=1:NBetweenFacs
+        theseFacLevels = unique(Trials.(BetweenFacs{iFac}));
+        theseFacLevels = double(theseFacLevels);
+        shouldMatch = 1:numel(theseFacLevels);
+        mismatchScore = sum( abs(shouldMatch(:)-theseFacLevels(:)) );
+        assert(mismatchScore==0,'Between-Ss factor levels must be coded 1,2,3... etc');
+    end
     [NGroups, ~, BetweenLevels, LevelLabels, ~, GroupSpecIndices] = CondList(Trials,BetweenFacs);  % NEWJEFF: Group spec indices is 1,2,...
     % This does not work properly with RowsWhichSatisfy if the between-Ss factor levels are anything other than 1,2,...
 else

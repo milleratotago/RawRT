@@ -1,4 +1,4 @@
-function [outResultTable, outSelectedIndices] = CondSubsampleT(inTrials,NTrials,CondSpecs,varargin)
+function [outResultTable, outSelectedIndices, outSelectedTrials] = CondSubsampleT(inTrials,NTrials,CondSpecs,varargin)
     % Make an output table with a random sample of trials from each condition indicated by CondSpecs.
     % Use all of the subjects.
     % The number of rows in the sample (NSample) is controlled by NTrials as follows (let NTotal be the number of
@@ -13,6 +13,7 @@ function [outResultTable, outSelectedIndices] = CondSubsampleT(inTrials,NTrials,
     
     outResultTable = table;
     outSelectedIndices = zeros(0,0);
+    outSelectedTrials = false(height(inTrials),1);
     
     NConds = numel(mySubTableIndices);
     
@@ -40,6 +41,7 @@ function [outResultTable, outSelectedIndices] = CondSubsampleT(inTrials,NTrials,
                 NSample = NTotal + NTrials;
         end
         SelectedIndices = RandomRelevant(1:NSample);
+        outSelectedTrials(SelectedIndices) = true;
         OneSubTable = inTrials(SelectedIndices,:);
         %     Selected(SelectedIndices) = true;
         outResultTable = [outResultTable; OneSubTable(1:NSample,:)]; %#ok<AGROW>

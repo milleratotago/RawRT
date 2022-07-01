@@ -1,5 +1,4 @@
-function [ Prctiles ] = prctileTies( InputVector, PrctilesWanted )
-    % THIS VERSION BOMBS IF THE REQUESTED PERCENTILES CANNOT BE FOUND
+function [ Prctiles, Impossible ] = prctileTies( InputVector, PrctilesWanted )
     % Compute the requested percentile values using the data provided in the input vector.
     % This is the same as MATLAB's prctile function except when there are ties.  When there are ties, this function eliminates the "flat spots" in the cumulative
     % frequency polygon that prctile gives.  Such flat spots are undesirable when estimating a continuous probability distribution, where ties might arise
@@ -17,10 +16,15 @@ function [ Prctiles ] = prctileTies( InputVector, PrctilesWanted )
     % ans =
     %         11.8         12.6         13.4         14.2           15         15.8         16.6         17.4         18.2
     
-%   Impossible = false;
+    Impossible = false;
     NWanted = numel(PrctilesWanted);
     
     Prctiles = nan(1,NWanted);
+    
+    if length(InputVector) < NWanted
+        Impossible = true;
+        return;
+    end
     
     [UniqueVals, Counts, CumCounts] = UniqueCounts( InputVector );
     
@@ -28,16 +32,9 @@ function [ Prctiles ] = prctileTies( InputVector, PrctilesWanted )
     
     CumPcts = (CumCounts - Counts/2) * 100 / NInputs;
     
-    if length(InputVector) < NWanted
-%        Impossible = true;
-        ImpossibleFn;
-        return;
-    end
-    
     if (PrctilesWanted(1)<CumPcts(1))||(PrctilesWanted(end)>CumPcts(end))
         % NEWJEFF: KILLED THE ERROR MESSAGE FOR SIMULATIONS disp('Not enough distinct values to compute requested percentiles!');
-%        Impossible = true;
-        ImpossibleFn;
+        Impossible = true;
         return;
     end
     
@@ -47,27 +44,22 @@ function [ Prctiles ] = prctileTies( InputVector, PrctilesWanted )
         % because then UpperIdx & LowerIdx are empty.
         % As a crude guess, take the last index.
         if numel(UpperIdx)==0
-%           Impossible = true;
-            disp('i, NWanted, LowerIdx, UpperIdx')
-            [i, NWanted, LowerIdx, UpperIdx]
-            i
+            Impossible = true;
             UpperIdx = numel(CumPcts);
-            ImpossibleFn;
         end
         LowerIdx = UpperIdx - 1;
         try
             Prctiles(i) = UniqueVals(LowerIdx) + (UniqueVals(UpperIdx) - UniqueVals(LowerIdx)) * (PrctilesWanted(i) - CumPcts(LowerIdx)) / (CumPcts(UpperIdx)- CumPcts(LowerIdx));
         catch
-            ImpossibleFn;
-        end
-    end
-    
-    function ImpossibleFn
             InputVector %#ok<*NOPRT>
+            disp('i, NWanted, LowerIdx, UpperIdx')
+            [i, NWanted, LowerIdx, UpperIdx]
             PrctilesWanted
             UniqueVals
             CumPcts
             error('Could not compute percentiles.');
+        end
     end
+    
 end
 

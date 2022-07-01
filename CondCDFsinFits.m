@@ -17,7 +17,7 @@ function [outCDFs, CondParmTbl] = CondCDFsinFits(inTrials,sDV,CondSpecs,FitDist,
     %          TrialsToScore is a list of booleans, one per trial, exactly as would normally be passed with 'Include'
     %   Include/Exclude options passed through to indicate which trials should be included in
     %      estimation of distribution parameters.
-    %   ParmTbl   : A table of distribution parameters with one row per combination of CondSpecs,
+    %   'ParmTbl',CondParmsTbll   : A table of distribution parameters with one row per combination of CondSpecs,
     %               to avoid re-fitting these if they have already been fit.
     %               This table may NOT have extra, ignored CondSpecs parameters.
     %

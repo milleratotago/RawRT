@@ -178,7 +178,7 @@ struct('sName',VSJmnRTs.sHybrid,     'Func',@VSJmnRTs.Hybrid,     'NParms',0,'NO
                     currentMax = max(inRTs(~Excluded));
                     currentMin = min(inRTs(~Excluded));
                     
-                    % temporarily exclude RTs at max, INCLUDING ALL TIES
+                    % Do NOT temporarily exclude RTs at max or min
                     tempMean = mean(inRTs(~(Excluded)));
                     tempSD = std(inRTs(~(Excluded)));
                     
@@ -188,13 +188,13 @@ struct('sName',VSJmnRTs.sHybrid,     'Func',@VSJmnRTs.Hybrid,     'NParms',0,'NO
                     
                     % if the max is above the cutoff, exclude it INCLUDING ALL TIES & check again
                     if currentMax > tempmaxCutoff
-                        TooHi = TooHi | (inRTs==currentMax);
+                        TooHi = TooHi | (inRTs>=currentMax-eps);  % Use eps here to avoid numerical problems
                         NeedToCheck = true;
                     end
                     
-                    % if the min is below the cutoff, exclude it INCLUDING ALL TIES NEWJEFF & check again
+                    % if the min is below the cutoff, exclude it INCLUDING ALL TIES & check again
                     if currentMin < tempminCutoff
-                        TooLo = TooLo | (inRTs==currentMin);
+                        TooLo = TooLo | (inRTs<=currentMin+eps);  % Use eps here to avoid numerical problems
                         NeedToCheck = true;
                     end
                     
@@ -311,13 +311,13 @@ struct('sName',VSJmnRTs.sHybrid,     'Func',@VSJmnRTs.Hybrid,     'NParms',0,'NO
                     
                     % if the max is above the cutoff, exclude it INCLUDING ALL TIES & check again
                     if currentMax > tempmaxCutoff
-                        TooHi = TooHi | (inRTs==currentMax);
+                        TooHi = TooHi | (inRTs>=currentMax-eps);  % Use eps here to avoid numerical problems
                         NeedToCheck = true;
                     end
                     
                     % if the min is below the cutoff, exclude it INCLUDING ALL TIES NEWJEFF & check again
                     if currentMin < tempminCutoff
-                        TooLo = TooLo | (inRTs==currentMin);
+                        TooLo = TooLo | (inRTs<=currentMin+eps);  % Use eps here to avoid numerical problems
                         NeedToCheck = true;
                     end
                     

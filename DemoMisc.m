@@ -7,6 +7,7 @@
 %   * CondMedianBTS
 %   * CondMeansTrimmed
 %   * CondCenMoment
+%   * CondDistToBox
 
 %% CondSummaryScores Demo.
 
@@ -44,3 +45,9 @@ WilcoxSR = Condsignrank(Trials,'Baseline','Stim',{'Bird','Cell'});
 % CondCenMoment
 NMoment = 3;
 [CenMomTbl, CenMomNames, CenMom3] = CondCenMoment(Trials,'Stim',{'Bird'},NMoment);
+
+% CondDistToBox
+Trials.DistToBox = CondDistToBox(Trials,'Stim',{'Bird'});
+DVs = Trials.Stim(Trials.Bird==1);
+[a, b, c] = BoxplotCalcs(DVs);
+

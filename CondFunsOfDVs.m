@@ -1,6 +1,6 @@
 function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,FunHandleCellArray,varargin)
     % 2022-02-09: This new version will compute in parallel across the different conditions.
-    %    To make that happen, just call CondFunDVs(true) anytime after you start MATLAB and before
+    %    To make that happen, just call UseParallel(true) anytime after you start MATLAB and before
     %    you call CondFunsOfDVs (you have to make this call again after you 'clear all', if you do that).
     % Call each of the functions in FunHandleCellArray on each DV in sDVs for all combinations
     %   of the conditions indicated by CondSpecs.
@@ -93,6 +93,7 @@ function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,Fu
             OneDV{iCond,iDV} = OneSubTable.(sDVs{iDV});
         end
     end
+    clear mySubTableIndices;
     
     % Find out how many cells each function produces as output (all functions must produce the same number):
     OneResult = cell(1,NoutVarsPerFun);
@@ -103,36 +104,42 @@ function [outResultTable, outDVNames] = CondFunsOfDVs(inTrials,sDVs,CondSpecs,Fu
     
     % Compute all of the function values into HoldResults with parfor or for loop
     HoldResults = cell(NConds,NDVs,NFuns,NCellsPerFun);
-    WantParallel = CondFunDVsParallel;
+    WantParallel = UseParallel;
+    CondLoopLimits = UseLoopLimits;
+    if numel(CondLoopLimits) == 0
+        CondLoopLimits = [1, NConds];
+    end
     for iDV=1:NDVs
         for iFun=1:NFuns
             thisFun = FunHandleCellArray{iFun};
             if WantParallel
-                fprintf('p');
-                parfor iCond = 1:NConds
+%               fprintf('p');
+                parfor iCond = CondLoopLimits(1):CondLoopLimits(2)
                     OneResult = cell(1,NCellsPerFun);
                     [OneResult{:}] = thisFun(OneDV{iCond,iDV},PassThruArgs{:});
                     HoldResults(iCond,iDV,iFun,:) = OneResult(:);
+%                   fprintf('Parallel cond %d\n',iCond);
                 end
             else
-                fprintf('s');
-                for iCond = 1:NConds
+%               fprintf('s');
+                for iCond = CondLoopLimits(1):CondLoopLimits(2)
                     [OneResult{:}] = thisFun(OneDV{iCond,iDV},PassThruArgs{:});
                     HoldResults(iCond,iDV,iFun,:) = OneResult(:);
+%                   fprintf('Serial cond %d\n',iCond);
                 end
             end
         end
     end
-    fprintf('\n');
+%   fprintf('\n');
     
     % Load HoldResults into outResultTable
-    for iCond = 1:NConds
+    for iCond = CondLoopLimits(1):CondLoopLimits(2)
         for iDV=1:NDVs
             for iFun=1:NFuns
                 OneResult = HoldResults(iCond,iDV,iFun,:);
                 OneResultToKeep = OneResult(~DropOutputs);
                 for iOutVar=1:min(NoutVarsToKeepPerFun,numel(OneResultToKeep))
-                    if iCond==1
+                    if iCond==CondLoopLimits(1)
                         outResultTable.(outDVNames{iDV,iFun,iOutVar}) = NaN(NConds,numel(OneResultToKeep{iOutVar}));
                     end
                     outResultTable.(outDVNames{iDV,iFun,iOutVar})(iCond,:) = OneResultToKeep{iOutVar};
