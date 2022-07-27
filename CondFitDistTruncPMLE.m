@@ -23,7 +23,7 @@ function [outResultTable, outDVNames] = CondFitDistTruncPMLE(inTrials,sDV,CondSp
     UseFn =  isa(StartParmFn, 'function_handle');
 
     HoldParms = DistObj.ParmValues;  % Save and later restore parameter values so that each data set is fit with the same starting parameter values.
-    NParmsToFit= DistObj.NDistParms;
+    NParmsToFit = DistObj.NDistParms;
 
     % Code from CondFunsOfDVs to find the list of conditions to be processed and the
     % corresponding sets of trials:
@@ -35,6 +35,7 @@ function [outResultTable, outDVNames] = CondFitDistTruncPMLE(inTrials,sDV,CondSp
     ExitFlag = zeros(NConds,1);
     funcCount = zeros(NConds,1);
 
+    ppm = ParforProgressbar(NConds);
     parfor iCond=1:NConds
 
         % Extract the DVs to be fit in this condition:
@@ -69,14 +70,25 @@ function [outResultTable, outDVNames] = CondFitDistTruncPMLE(inTrials,sDV,CondSp
         else
             UpperTruncP = 1;
         end
+        DistObj.StartParmsMLE(TruncatedDVs);
         DistToFit = TruncatedP(DistObj,LowerTruncP,UpperTruncP,'FixedCutoffLow','FixedCutoffHi');
 
-        [~, ~, Best(iCond), ExitFlag(iCond), outstruc] = DistToFit.EstML(TruncatedDVs);
-        funcCount(iCond) = outstruc.funcCount;
-        parmests = DistToFit.ParmValues;
-        ParmValues(iCond,:) = parmests(1:NParmsToFit);
+        try
+            [~, ~, Best(iCond), ExitFlag(iCond), outstruc] = DistToFit.EstML(TruncatedDVs);
+            funcCount(iCond) = outstruc.funcCount;
+            parmests = DistToFit.ParmValues;
+            ParmValues(iCond,:) = parmests(1:NParmsToFit);
+        catch
+            % NEWJEFF: Print warning here, maybe diary
+            Best(iCond) = nan;
+            ExitFlag(iCond) = -1;
+            funcCount(iCond) = -1;
+            ParmValues(iCond,:) = nan(1,NParmsToFit);
+        end
+        ppm.increment();
 
     end
+    delete(ppm);
 
     for iParm=1:NParmsToFit
         outResultTable.(DistObj.ParmNames{iParm}) = ParmValues(:,iParm);

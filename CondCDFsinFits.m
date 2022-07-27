@@ -6,7 +6,7 @@ function [outCDFs, CondParmTbl] = CondCDFsinFits(inTrials,sDV,CondSpecs,FitDist,
     % Inputs:
     %
     %   inTrials  : table holding the trial-by-trial data for all subjects and conditions
-    %   sDV       : name of the variable for which Z scores are to be computed
+    %   sDV       : name of the variable for which CDFs are to be computed
     %   CondSpecs : Conditions to be kept separate when computing Z scores (e.g., subject, task, etc)
     %   FitDist   : A Cupid distribution, eg. ExGauMn
     %
@@ -14,7 +14,8 @@ function [outCDFs, CondParmTbl] = CondCDFsinFits(inTrials,sDV,CondSpecs,FitDist,
     %   ScoreInclude: This is a special option allowing CDFs to be computed also for some trials that
     %      were NOT included in parameter estimation.  To use it, include the optional parameters:
     %          'ScoreInclude',TrialsToScore
-    %          TrialsToScore is a list of booleans, one per trial, exactly as would normally be passed with 'Include'
+    %          TrialsToScore is a list of booleans, one per trial, exactly as would normally be passed with 'Include'.
+    %          If this option is used, it overrides varargin options with respect to computation of CDFs but not parameter estimation.
     %   Include/Exclude options passed through to indicate which trials should be included in
     %      estimation of distribution parameters.
     %   'ParmTbl',CondParmsTbll   : A table of distribution parameters with one row per combination of CondSpecs,
@@ -40,9 +41,10 @@ function [outCDFs, CondParmTbl] = CondCDFsinFits(inTrials,sDV,CondSpecs,FitDist,
     FirstParm = numel(CondSpecs)+1;
     LastParm = FirstParm + FitDist.NDistParms - 1;
     ParmList = FirstParm:LastParm;
-    [ScoreSubTableIndices, ScoreCondLabels] = SubTableIndices(inTrials,CondSpecs,varargin{:});
     if numel(TrialsToScore) == NinTrials
         [ScoreSubTableIndices, ScoreCondLabels] = SubTableIndices(inTrials,CondSpecs,'Include',TrialsToScore);
+    else
+        [ScoreSubTableIndices, ScoreCondLabels] = SubTableIndices(inTrials,CondSpecs,varargin{:});
     end
     
     NConds = height(ScoreCondLabels);
