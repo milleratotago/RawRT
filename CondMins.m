@@ -9,14 +9,17 @@ NConds = height(outResultTable);
 
 outDVName = UniqueVarname(inTrials,'min');
 
-RowAddresses = zeros(NConds,1);
-Mins = zeros(NConds,1);
+RowAddresses = nan(NConds,1);
+Mins = nan(NConds,1);
 
 for iCond = 1:NConds
     OneSubTable = inTrials(mySubTableIndices{iCond},:);
     OneDV = OneSubTable.(sDV);
-    [Mins(iCond), thisRow] = min(OneDV);
-    RowAddresses(iCond) = mySubTableIndices{iCond}(thisRow);
+    [m, thisRow] = min(OneDV);
+    if numel(m)>0
+        Mins(iCond) = m;
+        RowAddresses(iCond) = mySubTableIndices{iCond}(thisRow);
+    end
 end
 outResultTable.(outDVName) = Mins;
 

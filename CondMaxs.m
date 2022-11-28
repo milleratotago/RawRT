@@ -9,14 +9,17 @@ NConds = height(outResultTable);
 
 outDVName = UniqueVarname(inTrials,'max');
 
-RowAddresses = zeros(NConds,1);
-Maxs = zeros(NConds,1);
+RowAddresses = nan(NConds,1);
+Maxs = nan(NConds,1);
 
 for iCond = 1:NConds
     OneSubTable = inTrials(mySubTableIndices{iCond},:);
     OneDV = OneSubTable.(sDV);
-    [Maxs(iCond), thisRow] = max(OneDV);
-    RowAddresses(iCond) = mySubTableIndices{iCond}(thisRow);
+    [m, thisRow] = max(OneDV);
+    if numel(m)>0
+        Maxs(iCond) = m;
+        RowAddresses(iCond) = mySubTableIndices{iCond}(thisRow);
+    end
 end
 outResultTable.(outDVName) = Maxs;
 
