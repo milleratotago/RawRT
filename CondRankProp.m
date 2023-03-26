@@ -1,6 +1,9 @@
 function outVals = CondRankProp(inTrials,sDV,CondSpecs,varargin)
 % For each CondSpecs combination of conditions, rank the trials on inTable.(sDV),
 %  then output Rank/N, where N is the number of trials in that condition.
+%
+% *** SPECIFY VARARGIN 'Adjust' if you want %ile estimates 0.5/N to N-0.5/N ***
+%
 % Inputs:
 %
 %   inTrials  : table holding the trial-by-trial data for all subjects and conditions

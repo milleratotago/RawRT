@@ -34,4 +34,6 @@ for iCond=1:height(EZ2DiffParms)
 end
 
 %% LBA
-LBAParms = CondFitLBA2(Trials,'RT',{'SubNo' 'Cond'});
+
+StartParmsArray = [0.8 300 150 0.4 200];
+LBAParms = CondFitLBA2(Trials,'RT',{'SubNo' 'Cond'},StartParmsArray);

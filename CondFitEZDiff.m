@@ -1,5 +1,6 @@
 function [outResultTable, outDVNames] = CondFitEZDiff(inTrials,sRT,CondSpecs,varargin)
     % For each combination of CondSpecs, fit the EZ-Diffusion model using all rows with that combination.
+    % This version fits the three-parameter version of Wagenmakers, Van der Maas, and Grasman (2007).
     % Note that CORRECT RESPONSES & ERRORS should be included when fitting this model.
     %
     % Optional arguments:

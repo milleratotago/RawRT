@@ -35,8 +35,8 @@ function [outResultTable, outDVNames] = CondFitDistTruncPMLE(inTrials,sDV,CondSp
     ExitFlag = zeros(NConds,1);
     funcCount = zeros(NConds,1);
 
-    ppm = ParforProgressbar(NConds);
-    parfor iCond=1:NConds
+    % ppm = ParforProgressbar(NConds);
+    parfor iCond=1:NConds % parfor
 
         % Extract the DVs to be fit in this condition:
         OneSetOfDVs = inTrials.(sDV)(mySubTableIndices{iCond});
@@ -72,23 +72,32 @@ function [outResultTable, outDVNames] = CondFitDistTruncPMLE(inTrials,sDV,CondSp
         end
         DistObj.StartParmsMLE(TruncatedDVs);
         DistToFit = TruncatedP(DistObj,LowerTruncP,UpperTruncP,'FixedCutoffLow','FixedCutoffHi');
+        
+        % CLUGE HERE: Relax convergence criteria because TruncatedP's default 1e-14 is too stringent with truncated distributions.
+        DistToFit.SearchOptions = DistToFit.BasisRV.SearchOptions;
+%         DistToFit.SearchOptions.TolX = 1e-8;
+%         DistToFit.SearchOptions.TolFun = 1e-8;
+%         DistToFit.SearchOptions.Display = 'off';
 
-        try
+%         try
             [~, ~, Best(iCond), ExitFlag(iCond), outstruc] = DistToFit.EstML(TruncatedDVs);
             funcCount(iCond) = outstruc.funcCount;
             parmests = DistToFit.ParmValues;
             ParmValues(iCond,:) = parmests(1:NParmsToFit);
-        catch
-            % NEWJEFF: Print warning here, maybe diary
-            Best(iCond) = nan;
-            ExitFlag(iCond) = -1;
-            funcCount(iCond) = -1;
-            ParmValues(iCond,:) = nan(1,NParmsToFit);
-        end
-        ppm.increment();
+%             if ExitFlag(iCond) == 0
+%                 disp('Pause here')
+%             end
+%         catch
+%             % NEWJEFF: Print warning here, maybe diary
+%             Best(iCond) = nan;
+%             ExitFlag(iCond) = -1;
+%             funcCount(iCond) = -1;
+%             ParmValues(iCond,:) = nan(1,NParmsToFit);
+%         end
+        % ppm.increment();
 
     end
-    delete(ppm);
+    % delete(ppm);
 
     for iParm=1:NParmsToFit
         outResultTable.(DistObj.ParmNames{iParm}) = ParmValues(:,iParm);

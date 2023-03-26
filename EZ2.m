@@ -2,6 +2,13 @@ classdef EZ2
     % A collection of functions used in estimating the parameters of the EZ2 model
     % of Grasman, Wagenmakers, & van der Maas (2009). doi: 10.1016/j.jmp.2009.01.006
     % These functions are translations from the Grasman R package, provided to me by Tobias Rieger.
+    % Note that this version of the diffusion model is fit with separate RTs for correct & error,
+    % and it produces estimates of four parameters.
+    % In contrast, the version of Wagenmakers, Van der Maas, and Grasman (2007) is fit with just correct RTs
+    % and it produces estimates of only three parameters.
+    %
+    % WARNING: The parameter estimates produced by these procedures are HIGHLY SENSITIVE to the starting
+    % values of the parameter search.  Ter values and drift rates can be negative.
     
     % The model parameters are:
     % v: drift rate
@@ -76,7 +83,7 @@ classdef EZ2
         end % function cvrt
         
         
-        function predmrt = mrt (v, z, a, Ter)
+        function predmrt = mrt (v, z, a)
             % Description from the Grasman R Package:
             % "Given a boundary separation, a starting point, and a drift rate, this
             % function computes the mean exit time/exit time variance of a one dimensional
@@ -93,8 +100,7 @@ classdef EZ2
                 (1/v) * ... %expr13
                 (z) - ...
                 ((1/v) * a) / ... %expr16
-                ((exp((-2 * v/sSquare) * a)) - 1) + ... %expr7
-                +Ter;
+                ((exp((-2 * v/sSquare) * a)) - 1); %expr7
             
             % mrt = mrt*1000; %converts seconds into milliseconds
             
@@ -147,9 +153,9 @@ classdef EZ2
         function pred = predicted(v,z,a,Ter)
             % Compute the 5 predicted values from these parameter values.
             pred = nan(1,5);
-            pred(1) = EZ2.cmrt(v,z,a)+Ter;  % I don't know why EZ2cmrt & EZ2mrt treat Ter differently!
+            pred(1) = EZ2.cmrt(v,z,a) + Ter;  % EZ2cmrt & EZ2mrt treated Ter differently in R, but JOM changed that
             pred(2) = EZ2.cvrt(v,z,a);
-            pred(3) = EZ2.mrt(v,z,a,Ter);
+            pred(3) = EZ2.mrt(v,z,a) + Ter;
             pred(4) = EZ2.vrt(v,z,a);
             pred(5) = EZ2.pe(v,z,a);
         end
@@ -167,17 +173,19 @@ classdef EZ2
             % Estimate parameters of EZ2-Diffusion model for a 2-choice RT task
             %
             % Inputs:
-            % Pe = proportion correct, between 0 and 1; cannot be 0.0, 0.5, or 1.0.
+            % Pe = proportion error, between 0 and 1; cannot be 0.0, 0.5, or 1.0.
             % MRT, VRT = mean /variance of ALL response RTs MEASURED IN SECONDS
             % CorMRT, CorVRT = mean /variance of CORRECT response RTs MEASURED IN SECONDS
             %
             % Optional inputs:
             %   'SearchOptions',SO: SO is a MATLAB optimset structure passed through to fminsearch
-            %   'StartingValues',SV: SV is a vector of fminsearch starting values for the 5 parameters v, z, a, Ter, s.
+            %   'StartingValues',SV: SV is a vector of fminsearch starting values for the 5 parameters v, z, a, Ter.
             %
             % Outputs:
             % Estimated parameter values.
             % SearchResults returned by from fminsearch
+
+            assert(CorMRT<10 && MRT<10,'This function requires the means and variances of RTs measured in SECONDS, not milliseconds!');
             
             DefaultStartingValues = [0.15, 0.08, 0.17, 0.3];
             [StartingValues, varargin] = ExtractNameVali('StartingValues',DefaultStartingValues,varargin);

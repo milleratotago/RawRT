@@ -10,6 +10,11 @@ function [v, a, Ter, MDT] = EZDiff(Pc, VRT, MRT, varargin)
     % is obtained from the RT mean in milliseconds by simply dividing by 1000, but the RT variance
     % in seconds-squared is obtained from the RT variance in milliseconds by dividing by 1000 times 1000
     % (i.e., 1,000,000)."
+    %
+    % Note that this version of the diffusion model is fit with just correct RTs,
+    % and it produces estimates of three parameters.
+    % In contrast the version of Grasman, Wagenmakers, & van der Maas (2009) is fit with separate RTs for correct & error,
+    % and it produces estimates of four parameters.
       
     if numel(varargin)==0
         s = 0.1;  % default value for the scaling parameter

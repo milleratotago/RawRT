@@ -35,7 +35,7 @@ function [outResultTable, outDVNames] = CondFitLBA2(inTrials,sRT,CondSpecs,pArra
 
     for iDV = 1:NDVs
         outResultTable.(outDVNames{iDV}) = zeros(NConds,1);
-    end;
+    end
     
     % Set up model --> structure containing information on which parameters to
     % share between conditions.  Here fit each condition separately, so:
